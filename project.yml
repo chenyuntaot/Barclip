@@ -2,6 +2,9 @@ name: ClipboardHistory
 options:
   deploymentTarget:
     macOS: '14.0'
+  fileTypes:
+    icon:
+      file: true
 settings:
   base:
     SWIFT_VERSION: '6.0'
@@ -15,13 +18,19 @@ targets:
     sources:
       - path: ClipboardHistory
         excludes: [Info.plist]
+      - path: AppIcon.icon
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: local.ClipboardHistory
         PRODUCT_NAME: Barclip
         PRODUCT_MODULE_NAME: ClipboardHistory
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_CFBundleDisplayName: Barclip
+        INFOPLIST_KEY_NSHumanReadableCopyright: '© 2026 陈云涛'
+        MARKETING_VERSION: '1.0'
+        CURRENT_PROJECT_VERSION: '1'
         ENABLE_HARDENED_RUNTIME: YES
   ClipboardHistoryTests:
     type: bundle.unit-test

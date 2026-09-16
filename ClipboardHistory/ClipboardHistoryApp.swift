@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -5,10 +6,30 @@ struct ClipboardHistoryApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        MenuBarExtra("Barclip", systemImage: "clipboard") {
+        MenuBarExtra {
             ClipboardMenuView().environment(delegate.store)
+        } label: {
+            MenuBarExtraLabel()
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+struct MenuBarExtraLabel: View {
+    var body: some View {
+        ClipboardGlyph(pointSize: 22)
+            .accessibilityLabel("Barclip")
+    }
+}
+
+struct ClipboardGlyph: View {
+    var pointSize: CGFloat = 18
+
+    var body: some View {
+        Image("MenuBarIcon")
+            .renderingMode(.template)
+            .interpolation(.high)
+            .frame(width: pointSize, height: pointSize)
     }
 }
 

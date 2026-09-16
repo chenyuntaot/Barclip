@@ -3,18 +3,20 @@
 ## 平台与入口
 
 原生 Swift 6 + SwiftUI，最低 macOS 14（Observation）。不引入第三方运行依赖。
-`ClipboardHistoryApp` 只创建 `MenuBarExtra`，不创建主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。
+`ClipboardHistoryApp` 只创建 `MenuBarExtra`，不创建主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。应用图标使用仓库根目录的 Icon Composer 文件 `AppIcon.icon`，由 asset catalog 编译进应用包。菜单栏 Extra 和使用页左上角标题都使用用户提供的剪贴板线稿做成的模板图 `MenuBarIcon`。黑底转为透明，由系统按浅色/深色界面着色，不使用彩色 AppIcon 或系统 `clipboard` 符号。
 
-使用菜单栏弹出面板中的设置页，避免为两个设置项引入独立窗口。`ClipboardMenuView` 本地管理分类与设置页切换，Store 通过 Environment 注入。进入设置时侧栏与分隔线收起，左右合为一块，仅左上角保留返回；用弹簧动画过渡。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。
+使用菜单栏弹出面板中的设置页，避免为两个设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回；用弹簧动画过渡。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮、侧栏收起动画冲突。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。
 
 ## 责任划分
 
 - `Models/ClipboardEntry.swift`：文本/图片分类、原始文本或 PNG、预览和保存策略。
+- `Models/AppInfo.swift`：显示名、版本、版权、开发者与仓库等关于页元数据。
 - `Services/PasteboardService.swift`：AppKit 剪贴板读写、文本与位图筛选、访问拒绝判断。
 - `Services/HistoryRepository.swift`：actor 隔离 JSON 元数据与图片 sidecar 读写。
 - `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。
-- `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示与设置入口。
-- `Views/ClipboardSettingsView.swift`：容量与保存策略。
+- `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示、设置与关于入口。
+- `Views/ClipboardSettingsView.swift`：容量、保存策略，以及底部程序版本 / 关于我们 / 版权入口。
+- `Views/ClipboardAboutView.swift`：程序版本和关于我们页面，展示编译后的应用图标。
 
 ## 监听方式
 

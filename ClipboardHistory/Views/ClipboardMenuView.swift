@@ -4,16 +4,22 @@ import SwiftUI
 struct ClipboardMenuView: View {
     @Environment(ClipboardStore.self) private var store
     @State private var showsSettings = false
+    @State private var showsAbout = false
     @State private var selectedKind: ClipboardKind
 
-    init(initialKind: ClipboardKind = .text, isShowingSettings: Bool = false) {
+    init(initialKind: ClipboardKind = .text, isShowingSettings: Bool = false, isShowingAbout: Bool = false) {
         _selectedKind = State(initialValue: initialKind)
-        _showsSettings = State(initialValue: isShowingSettings)
+        _showsSettings = State(initialValue: isShowingSettings || isShowingAbout)
+        _showsAbout = State(initialValue: isShowingAbout)
+    }
+
+    private var isAccessoryPanel: Bool {
+        showsSettings || showsAbout
     }
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            if !showsSettings {
+            if !isAccessoryPanel {
                 kindRail
                     .frame(width: 64)
                     .frame(maxHeight: .infinity, alignment: .top)
@@ -25,7 +31,13 @@ struct ClipboardMenuView: View {
                     .transition(.opacity)
             }
             Group {
-                if showsSettings {
+                if showsAbout {
+                    aboutColumn
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .offset(x: 18)),
+                            removal: .opacity.combined(with: .offset(x: 18))
+                        ))
+                } else if showsSettings {
                     settingsColumn
                         .transition(.asymmetric(
                             insertion: .opacity.combined(with: .offset(x: 18)),
@@ -40,11 +52,12 @@ struct ClipboardMenuView: View {
                         ))
                 }
             }
-            .frame(width: showsSettings ? 436 : 360)
+            .frame(width: isAccessoryPanel ? 436 : 360)
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .padding(16)
         .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsSettings)
+        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsAbout)
     }
 
     private var currentEntries: [ClipboardEntry] {
@@ -65,7 +78,7 @@ struct ClipboardMenuView: View {
             ForEach(ClipboardKind.allCases) { kind in
                 railButton(title: kind.title, systemImage: kind.systemImage, isSelected: selectedKind == kind) {
                     selectedKind = kind
-                    showsSettings = false
+                    closeAccessoryPanels()
                 }
                 .help(kind.title)
                 .accessibilityLabel(kind.title)
@@ -87,6 +100,7 @@ struct ClipboardMenuView: View {
                 systemImage: "gearshape",
                 disabled: store.isLoading
             ) {
+                showsAbout = false
                 showsSettings = true
             }
             .help("设置")
@@ -124,32 +138,62 @@ struct ClipboardMenuView: View {
     }
 
     private var settingsColumn: some View {
+        accessoryColumn(backHelp: "返回历史", backDisabled: store.isLoading) {
+            closeAccessoryPanels()
+        } content: {
+            ClipboardSettingsView(onOpenAbout: { showsAbout = true })
+                .disabled(store.isLoading || store.storageError == .load)
+        }
+    }
+
+    private var aboutColumn: some View {
+        accessoryColumn(backHelp: "返回设置") {
+            showsAbout = false
+        } content: {
+            ClipboardAboutView()
+        }
+    }
+
+    private func accessoryColumn<Content: View>(
+        backHelp: String,
+        backDisabled: Bool = false,
+        backAction: @escaping () -> Void,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Button {
-                    showsSettings = false
-                } label: {
+                Button(action: backAction) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.backward")
                         Text("返回")
                     }
                 }
                 .buttonStyle(SettingsBackButtonStyle())
-                .help("返回历史")
-                .accessibilityLabel("返回历史")
-                .disabled(store.isLoading)
+                .help(backHelp)
+                .accessibilityLabel(backHelp)
+                .disabled(backDisabled)
                 Spacer(minLength: 0)
             }
-            ClipboardSettingsView()
-                .disabled(store.isLoading || store.storageError == .load)
+            content()
                 .frame(maxWidth: .infinity)
         }
+    }
+
+    private func closeAccessoryPanels() {
+        showsAbout = false
+        showsSettings = false
     }
 
     private var mainColumn: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("Barclip", systemImage: "clipboard").font(.headline)
+                Label {
+                    Text("Barclip")
+                } icon: {
+                    ClipboardGlyph(pointSize: 16)
+                }
+                .font(.headline)
+                .labelStyle(.titleAndIcon)
                 Spacer()
                 Text("\(currentEntries.count) / \(store.capacity)")
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)

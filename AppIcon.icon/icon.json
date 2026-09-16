@@ -1,0 +1,39 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.99088,1.00000,0.94939,1.00000",
+      "display-p3:0.83071,0.96783,0.90583,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "grok-image-1814000b-5473-4356-97a3-e9937c2a9496.png",
+          "name" : "grok-image-1814000b-5473-4356-97a3-e9937c2a9496",
+          "position" : {
+            "scale" : 0.7,
+            "translation-in-points" : [
+              0,
+              -36
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

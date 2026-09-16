@@ -30,10 +30,53 @@ final class ViewRenderingTests: XCTestCase {
         await store.finishPendingSave()
         try render(ClipboardMenuView(initialKind: .image).environment(store), name: "images", appearance: .light)
         try render(ClipboardMenuView(isShowingSettings: true).environment(store), name: "settings-page", appearance: .light)
+        try render(ClipboardMenuView(isShowingAbout: true).environment(store), name: "about-page", appearance: .light)
         try render(ClipboardSettingsView().environment(store).padding(16).frame(width: 360),
                    name: "settings", appearance: .light)
         try render(ClipboardSettingsView().environment(store).padding(16).frame(width: 360),
                    name: "settings", appearance: .dark)
+        try render(ClipboardAboutView().padding(16).frame(width: 360),
+                   name: "about", appearance: .light)
+        try render(ClipboardAboutView().padding(16).frame(width: 360),
+                   name: "about", appearance: .dark)
+        try render(MenuBarExtraLabel().padding(8), name: "menu-bar-icon", appearance: .light)
+        try render(MenuBarExtraLabel().padding(8), name: "menu-bar-icon", appearance: .dark)
+    }
+
+    func testAppInfoExposesAboutMetadata() {
+        XCTAssertEqual(AppInfo.displayName, "Barclip")
+        XCTAssertEqual(AppInfo.developer, "陈云涛")
+        XCTAssertEqual(AppInfo.contactEmail, "chenyuntao0123@icloud.com")
+        XCTAssertEqual(AppInfo.mailtoURL.absoluteString, "mailto:chenyuntao0123@icloud.com")
+        XCTAssertEqual(AppInfo.repositoryURL.absoluteString, "https://github.com/chenyuntaot/Barclip")
+        XCTAssertEqual(AppInfo.copyright, "© 2026 陈云涛")
+        XCTAssertFalse(AppInfo.shortVersion.isEmpty)
+        XCTAssertFalse(AppInfo.buildNumber.isEmpty)
+        XCTAssertEqual(AppInfo.versionLabel, "\(AppInfo.shortVersion) (\(AppInfo.buildNumber))")
+    }
+
+    func testBundleUsesComposerAppIcon() throws {
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleIconName") as? String, "AppIcon")
+        XCTAssertGreaterThan(NSApplication.shared.applicationIconImage.size.width, 0)
+        let menuBarIcon = try XCTUnwrap(NSImage(named: "MenuBarIcon"), "菜单栏应使用模板剪贴板图标")
+        XCTAssertGreaterThan(menuBarIcon.size.width, 0)
+        XCTAssertTrue(menuBarIcon.isTemplate, "菜单栏图标必须按模板着色，才能适配浅色和深色状态栏")
+    }
+
+    func testSettingsFooterKeepsAboutEntryVisible() throws {
+        let suite = "ClipboardHistory.AboutFooter.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        let store = ClipboardStore(
+            pasteboard: RenderPasteboard(),
+            defaults: defaults,
+            repository: HistoryRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "history.json"))
+        )
+        let host = NSHostingController(rootView: ClipboardSettingsView().environment(store).frame(width: 360))
+        let size = host.sizeThatFits(in: CGSize(width: 360, height: 0))
+        XCTAssertGreaterThan(size.height, 330,
+            "设置页底部需要放下程序版本、关于我们和版权；实际 \(size.height)")
     }
 
     func testHistoryRemainsVisibleUnderCompactMenuProposal() async throws {
