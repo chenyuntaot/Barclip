@@ -2,60 +2,72 @@ import Foundation
 
 actor HistoryRepository {
     private let fileURL: URL
-    private let legacyDirectory: URL?
+    private let legacyDirectories: [URL]
     private var latestRevision = -1
 
-    static var legacyDirectoryURL: URL {
-        URL.applicationSupportDirectory
-            .appending(path: "ClipboardHistory", directoryHint: .isDirectory)
-    }
-
-    static func historyURL(inAppBundle bundleURL: URL = Bundle.main.bundleURL) -> URL {
-        bundleURL
-            .appending(path: "Contents", directoryHint: .isDirectory)
-            .appending(path: "Library", directoryHint: .isDirectory)
-            .appending(path: "Application Support", directoryHint: .isDirectory)
+    static func historyURL(inApplicationSupport directory: URL = .applicationSupportDirectory) -> URL {
+        directory.appending(path: "Barclip", directoryHint: .isDirectory)
             .appending(path: "history.json")
     }
 
     init() {
         fileURL = Self.historyURL()
-        legacyDirectory = Self.legacyDirectoryURL
+        legacyDirectories = [
+            Bundle.main.bundleURL.appending(path: "Contents/Library/Application Support", directoryHint: .isDirectory),
+            URL.applicationSupportDirectory.appending(path: "ClipboardHistory", directoryHint: .isDirectory)
+        ]
     }
 
-    init(fileURL: URL, legacyDirectory: URL? = nil) {
+    init(fileURL: URL, legacyDirectories: [URL] = []) {
         self.fileURL = fileURL
-        self.legacyDirectory = legacyDirectory
+        self.legacyDirectories = legacyDirectories
     }
 
     func load() throws -> [ClipboardEntry] {
         if FileManager.default.fileExists(atPath: fileURL.path) {
             let entries = try decode(from: fileURL)
-            try removeLegacyIfNeeded()
+            try markMigrationComplete()
             return entries
         }
-        guard let legacyFile = legacyHistoryFile,
-              FileManager.default.fileExists(atPath: legacyFile.path) else { return [] }
-        let entries = try decode(from: legacyFile)
-        try write(entries)
-        try removeLegacyIfNeeded()
-        return entries
+        guard !FileManager.default.fileExists(atPath: migrationMarker.path) else { return [] }
+        for directory in legacyDirectories {
+            let source = directory.appending(path: "history.json")
+            guard FileManager.default.fileExists(atPath: source.path) else { continue }
+            let entries = try decode(from: source)
+            try write(entries)
+            try markMigrationComplete()
+            return entries
+        }
+        try markMigrationComplete()
+        return []
     }
 
     func save(_ entries: [ClipboardEntry]?, revision: Int) throws {
         guard revision >= latestRevision else { return }
         latestRevision = revision
         guard let entries, !entries.isEmpty else {
+            // Record the decision before deleting history so a restart cannot reimport old data.
+            try markMigrationComplete()
             try removeSnapshotFiles()
-            try removeLegacyIfNeeded()
             return
         }
         try write(entries)
-        try removeLegacyIfNeeded()
+        try markMigrationComplete()
     }
 
-    private var legacyHistoryFile: URL? {
-        legacyDirectory?.appending(path: "history.json")
+    private var migrationMarker: URL {
+        fileURL.deletingLastPathComponent().appending(path: ".migration-complete")
+    }
+
+    private func markMigrationComplete() throws {
+        guard !FileManager.default.fileExists(atPath: migrationMarker.path) else { return }
+        try FileManager.default.createDirectory(
+            at: fileURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700]
+        )
+        try Data().write(to: migrationMarker, options: .atomic)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: migrationMarker.path)
     }
 
     private var imagesDirectory: URL {
@@ -64,10 +76,10 @@ actor HistoryRepository {
 
     private func decode(from url: URL) throws -> [ClipboardEntry] {
         let persisted = try JSONDecoder().decode([PersistableEntry].self, from: Data(contentsOf: url))
-        return try materialize(persisted)
+        return try materialize(persisted, imagesDirectory: url.deletingLastPathComponent().appending(path: "images"))
     }
 
-    private func materialize(_ items: [PersistableEntry]) throws -> [ClipboardEntry] {
+    private func materialize(_ items: [PersistableEntry], imagesDirectory: URL) throws -> [ClipboardEntry] {
         var entries: [ClipboardEntry] = []
         entries.reserveCapacity(items.count)
         for item in items {
@@ -143,11 +155,6 @@ actor HistoryRepository {
         if FileManager.default.fileExists(atPath: imagesDirectory.path) {
             try FileManager.default.removeItem(at: imagesDirectory)
         }
-    }
-
-    private func removeLegacyIfNeeded() throws {
-        guard let legacyDirectory, FileManager.default.fileExists(atPath: legacyDirectory.path) else { return }
-        try FileManager.default.removeItem(at: legacyDirectory)
     }
 }
 

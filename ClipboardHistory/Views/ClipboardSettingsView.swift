@@ -26,7 +26,7 @@ struct ClipboardSettingsView: View {
                             Text(policy.title).tag(policy)
                         }
                     }
-                    Text("选择重启后保留时，文本和图片会写进应用包内。把应用移到废纸篓会一起删掉这些记录。切换为退出后清空会删除磁盘缓存，当前记录仍可使用。")
+                    Text("选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

@@ -129,48 +129,112 @@ final class HistoryPersistenceTests: XCTestCase {
         XCTAssertTrue(restored.isEmpty)
     }
 
-    func testHistoryURLLivesInsideApplicationBundle() {
-        let app = URL(filePath: "/Applications/Barclip.app")
-        let url = HistoryRepository.historyURL(inAppBundle: app)
+    func testHistoryURLUsesBarclipApplicationSupport() {
+        let support = directory.appending(path: "Application Support")
         XCTAssertEqual(
-            url.path,
-            "/Applications/Barclip.app/Contents/Library/Application Support/history.json"
+            HistoryRepository.historyURL(inApplicationSupport: support),
+            support.appending(path: "Barclip/history.json")
+        )
+        XCTAssertEqual(
+            HistoryRepository.historyURL(),
+            URL.applicationSupportDirectory.appending(path: "Barclip/history.json")
         )
     }
 
-    func testDeletingAppBundleRemovesHistory() async throws {
+    func testDeletingAppBundlePreservesMigratedTextAndImages() async throws {
         let app = directory.appending(path: "Barclip.app")
-        let bundled = HistoryRepository.historyURL(inAppBundle: app)
-        let repository = HistoryRepository(fileURL: bundled)
-        try await repository.save([ClipboardEntry(text: "secret")], revision: 1)
-        XCTAssertTrue(FileManager.default.fileExists(atPath: bundled.path))
+        let legacy = app.appending(path: "Contents/Library/Application Support")
+        let oldFile = legacy.appending(path: "history.json")
+        let entries = [ClipboardEntry(text: "old text"), ClipboardEntry(imagePNG: TestPNG.pixel)]
+        try await HistoryRepository(fileURL: oldFile).save(entries, revision: 1)
+        let original = try Data(contentsOf: oldFile)
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectories: [legacy])
+        let migrated = try await repository.load()
+        XCTAssertEqual(migrated, entries)
+        XCTAssertEqual(try Data(contentsOf: oldFile), original)
         try FileManager.default.removeItem(at: app)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: bundled.path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: app.path))
+        let restored = try await HistoryRepository(fileURL: fileURL).load()
+        XCTAssertEqual(restored, entries)
     }
 
-    func testLegacyApplicationSupportIsMigratedThenRemoved() async throws {
-        let app = directory.appending(path: "Barclip.app")
-        let bundled = HistoryRepository.historyURL(inAppBundle: app)
+    func testLegacyApplicationSupportIsCopiedWithoutDeletingSource() async throws {
         let legacy = directory.appending(path: "ClipboardHistory")
         try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
-        try JSONEncoder().encode([ClipboardEntry(text: "old cache")])
-            .write(to: legacy.appending(path: "history.json"))
-        let repository = HistoryRepository(fileURL: bundled, legacyDirectory: legacy)
+        let oldFile = legacy.appending(path: "history.json")
+        try JSONEncoder().encode([ClipboardEntry(text: "old cache")]).write(to: oldFile)
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectories: [legacy])
         let restored = try await repository.load()
         XCTAssertEqual(restored.map(\.text), ["old cache"])
-        XCTAssertTrue(FileManager.default.fileExists(atPath: bundled.path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: oldFile.path))
     }
 
-    func testClearRemovesLegacyDirectory() async throws {
-        let legacy = directory.appending(path: "ClipboardHistory")
-        try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
-        try Data("[]".utf8).write(to: legacy.appending(path: "history.json"))
-        let repository = HistoryRepository(fileURL: fileURL, legacyDirectory: legacy)
+    func testClearPreventsLegacyReimportAfterRestart() async throws {
+        let legacy = directory.appending(path: "legacy")
+        try await HistoryRepository(fileURL: legacy.appending(path: "history.json"))
+            .save([ClipboardEntry(text: "old")], revision: 1)
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectories: [legacy])
         try await repository.save(nil, revision: 1)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
+        let restored = try await HistoryRepository(fileURL: fileURL, legacyDirectories: [legacy]).load()
+        XCTAssertTrue(restored.isEmpty)
         XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: legacy.appending(path: "history.json").path))
+    }
+
+    func testNewHistoryWinsOverBothLegacyLocations() async throws {
+        let sources = [directory.appending(path: "bundle"), directory.appending(path: "old-support")]
+        for source in sources {
+            try await HistoryRepository(fileURL: source.appending(path: "history.json"))
+                .save([ClipboardEntry(text: source.lastPathComponent)], revision: 1)
+        }
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectories: sources)
+        let migrated = try await repository.load()
+        XCTAssertEqual(migrated.map(\.text), ["bundle"])
+        try await repository.save([ClipboardEntry(text: "new")], revision: 1)
+        let restored = try await HistoryRepository(fileURL: fileURL, legacyDirectories: sources).load()
+        XCTAssertEqual(restored.map(\.text), ["new"])
+        try await repository.save(nil, revision: 2)
+        let cleared = try await HistoryRepository(fileURL: fileURL, legacyDirectories: sources).load()
+        XCTAssertTrue(cleared.isEmpty)
+    }
+
+    func testCorruptLegacyCacheCanRetryWithoutLosingSource() async throws {
+        let legacy = directory.appending(path: "legacy")
+        try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
+        let oldFile = legacy.appending(path: "history.json")
+        let corrupt = Data("invalid json".utf8)
+        try corrupt.write(to: oldFile)
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectories: [legacy])
+        do {
+            _ = try await repository.load()
+            XCTFail("Corrupt migration must fail")
+        } catch {
+            XCTAssertEqual(try Data(contentsOf: oldFile), corrupt)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+        }
+        try JSONEncoder().encode([ClipboardEntry(text: "repaired")]).write(to: oldFile)
+        let restored = try await repository.load()
+        XCTAssertEqual(restored.map(\.text), ["repaired"])
+    }
+
+    func testMigrationWriteFailureCanRetryWithoutChangingSource() async throws {
+        let legacy = directory.appending(path: "legacy")
+        let oldFile = legacy.appending(path: "history.json")
+        try await HistoryRepository(fileURL: oldFile).save([ClipboardEntry(imagePNG: TestPNG.pixel)], revision: 1)
+        let original = try Data(contentsOf: oldFile)
+        let blocked = directory.appending(path: "blocked")
+        try Data("file".utf8).write(to: blocked)
+        let target = blocked.appending(path: "history.json")
+        let repository = HistoryRepository(fileURL: target, legacyDirectories: [legacy])
+        do {
+            _ = try await repository.load()
+            XCTFail("Migration to an unwritable directory must fail")
+        } catch {
+            XCTAssertEqual(try Data(contentsOf: oldFile), original)
+        }
+        try FileManager.default.removeItem(at: blocked)
+        let restored = try await repository.load()
+        XCTAssertEqual(restored.first?.imagePNG, TestPNG.pixel)
     }
 
     func testPersistentImageUsesSidecarAndSurvivesRestart() async throws {
