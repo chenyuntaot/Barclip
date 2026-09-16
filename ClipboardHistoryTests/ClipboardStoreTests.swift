@@ -69,9 +69,66 @@ final class ClipboardStoreTests: XCTestCase {
         board.publish(" \n\t"); store.poll()
         board.publish("image", isText: false); store.poll()
         XCTAssertTrue(store.entries.isEmpty)
+        XCTAssertTrue(store.imageEntries.isEmpty)
         board.publish(String(repeating: "a", count: 1_048_577)); store.poll()
         XCTAssertTrue(store.entries.isEmpty)
         XCTAssertNotNil(store.message)
+        board.publishImage(Data(count: ClipboardStore.maxImageBytes + 1)); store.poll()
+        XCTAssertTrue(store.imageEntries.isEmpty)
+        XCTAssertEqual(store.message, "已跳过超过 8 MB 的图片。")
+    }
+
+    func testImageOrderingDeduplicationAndIndependenceFromText() async throws {
+        let (store, board, _) = try fixture()
+        let first = TestPNG.pixel
+        let second = TestPNG.altPixel
+        board.publish("hello"); store.poll()
+        board.publishImage(first); store.poll()
+        board.publishImage(second); store.poll()
+        board.publishImage(first); store.poll()
+        board.png = first
+        board.text = "https://example.com"
+        board.containsImage = true
+        board.containsText = true
+        board.changeCount += 1
+        store.poll()
+        XCTAssertEqual(store.imageEntries.map(\.imagePNG), [first, second])
+        XCTAssertEqual(store.entries.map(\.text), ["hello"])
+        store.poll()
+        XCTAssertEqual(store.imageEntries.count, 2)
+        store.clear(.image)
+        XCTAssertTrue(store.imageEntries.isEmpty)
+        XCTAssertEqual(store.entries.map(\.text), ["hello"])
+        await store.finishPendingSave()
+    }
+
+    func testImageCapacityTrimsIndependently() async throws {
+        let (store, board, _) = try fixture()
+        board.publish("keep"); store.poll()
+        for index in 0..<60 {
+            board.publishImage(TestPNG.unique(index)); store.poll()
+        }
+        XCTAssertEqual(store.imageEntries.count, 50)
+        XCTAssertEqual(store.entries.count, 1)
+        store.setCapacity(10)
+        XCTAssertEqual(store.imageEntries.count, 10)
+        XCTAssertEqual(store.entries.count, 1)
+        await store.finishPendingSave()
+    }
+
+    func testImageCopyAndFailure() async throws {
+        let (store, board, _) = try fixture()
+        board.publishImage(TestPNG.pixel); store.poll()
+        let entry = try XCTUnwrap(store.imageEntries.first)
+        board.publish("text"); store.poll()
+        store.copy(entry); store.poll()
+        XCTAssertEqual(board.png, TestPNG.pixel)
+        XCTAssertEqual(store.imageEntries.map(\.imagePNG), [TestPNG.pixel])
+        XCTAssertEqual(store.entries.map(\.text), ["text"])
+        board.writeSucceeds = false
+        store.copy(entry)
+        XCTAssertEqual(store.message, "复制失败，请重试。")
+        await store.finishPendingSave()
     }
 
     func testPermissionDenialAndReadFailureRecover() async throws {
@@ -112,7 +169,21 @@ final class ClipboardStoreTests: XCTestCase {
         let service = PasteboardService(pasteboard: board)
         XCTAssertTrue(service.writeText("模拟文本\n📝"))
         XCTAssertTrue(service.containsText)
+        XCTAssertFalse(service.containsImage)
         XCTAssertEqual(service.readText(), "模拟文本\n📝")
+        XCTAssertTrue(service.writePNG(TestPNG.pixel))
+        XCTAssertTrue(service.containsImage)
+        XCTAssertFalse(service.containsText)
+        XCTAssertEqual(service.readPNG(), TestPNG.pixel)
+        board.clearContents()
+        board.setData(TestPNG.pixel, forType: .png)
+        board.setString("https://example.com", forType: .string)
+        XCTAssertTrue(service.containsImage)
+        XCTAssertTrue(service.containsText)
+        board.clearContents()
+        board.setData(TestPNG.pixel, forType: .tiff)
+        XCTAssertTrue(service.containsImage)
+        XCTAssertNotNil(service.readPNG())
         board.clearContents()
         board.setData(Data(), forType: .png)
         XCTAssertFalse(service.containsText)
@@ -120,10 +191,15 @@ final class ClipboardStoreTests: XCTestCase {
         board.setString("sensitive", forType: .string)
         board.setData(Data(), forType: NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType"))
         XCTAssertFalse(service.containsText)
+        XCTAssertFalse(service.containsImage)
         board.clearContents()
         board.setString("file:///example", forType: .string)
         board.setString("file:///example", forType: .fileURL)
         XCTAssertFalse(service.containsText)
+        board.clearContents()
+        board.setData(TestPNG.pixel, forType: .png)
+        board.setString("file:///example", forType: .fileURL)
+        XCTAssertFalse(service.containsImage)
     }
 
     func testMonitorStopsAndCanRestart() async throws {
@@ -149,18 +225,46 @@ private final class FakePasteboard: PasteboardAccess {
     var changeCount = 0
     var isAccessDenied = false
     var containsText = true
+    var containsImage = false
     var text: String?
+    var png: Data?
     var readCount = 0
     var writeSucceeds = true
     func publish(_ value: String?, isText: Bool = true) {
         text = value
+        png = nil
         containsText = isText
+        containsImage = false
+        changeCount += 1
+    }
+    func publishImage(_ data: Data) {
+        png = data
+        text = nil
+        containsText = false
+        containsImage = true
         changeCount += 1
     }
     func readText() -> String? { readCount += 1; return text }
+    func readPNG() -> Data? { png }
     func writeText(_ text: String) -> Bool {
         guard writeSucceeds else { return false }
         publish(text)
         return true
+    }
+    func writePNG(_ data: Data) -> Bool {
+        guard writeSucceeds else { return false }
+        publishImage(data)
+        return true
+    }
+}
+
+enum TestPNG {
+    static let pixel = Data(base64Encoded:
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")!
+    static let altPixel = Data(base64Encoded:
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=")!
+
+    static func unique(_ index: Int) -> Data {
+        pixel + Data([UInt8(truncatingIfNeeded: index)])
     }
 }

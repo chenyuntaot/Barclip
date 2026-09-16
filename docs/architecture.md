@@ -5,27 +5,29 @@
 原生 Swift 6 + SwiftUI，最低 macOS 14（Observation）。不引入第三方运行依赖。
 `ClipboardHistoryApp` 只创建 `MenuBarExtra`，不创建主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。
 
-使用菜单栏弹出面板中的设置页，避免为两个设置项引入独立窗口。`ClipboardMenuView` 本地管理页面切换，Store 通过 Environment 注入。
+使用菜单栏弹出面板中的设置页，避免为两个设置项引入独立窗口。`ClipboardMenuView` 本地管理分类与设置页切换，Store 通过 Environment 注入。进入设置时侧栏与分隔线收起，左右合为一块，仅左上角保留返回；用弹簧动画过渡。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。
 
 ## 责任划分
 
-- `Models/ClipboardEntry.swift`：原始文本、标识、时间和预览；保存策略枚举。
-- `Services/PasteboardService.swift`：AppKit 剪贴板读写、类型筛选和访问拒绝判断。
-- `Services/HistoryRepository.swift`：actor 隔离本机 JSON 文件读写。
+- `Models/ClipboardEntry.swift`：文本/图片分类、原始文本或 PNG、预览和保存策略。
+- `Services/PasteboardService.swift`：AppKit 剪贴板读写、文本与位图筛选、访问拒绝判断。
+- `Services/HistoryRepository.swift`：actor 隔离 JSON 元数据与图片 sidecar 读写。
 - `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。
-- `Views/ClipboardMenuView.swift`：历史、复制、清空、状态提示与设置入口。
+- `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示与设置入口。
 - `Views/ClipboardSettingsView.swift`：容量与保存策略。
 
 ## 监听方式
 
-使用应用生命周期内的 Swift Concurrency Task，每 500ms 检查 NSPasteboard.changeCount，仅变更后读取文本。菜单关闭后仍然工作，退出时取消。读前后校验 changeCount，避免读到跨版本内容。
+使用应用生命周期内的 Swift Concurrency Task，每 500ms 检查 NSPasteboard.changeCount，仅变更后读取。若剪贴板含 PNG / TIFF / JPEG 位图则记入图片历史（TIFF 与 JPEG 转成 PNG），否则读取文本。菜单关闭后仍然工作，退出时取消。读前后校验 changeCount，避免读到跨版本内容。同一份内容同时有图和文字时只保留图片，避免把图片附带的 URL 记进文本历史。
 
 没有使用私有通知或辅助功能注入。轮询成本低，但可能遗漏 500ms 内连续复制的中间值；如果后续要求完整捕获高频事件，需要重新评估此约束。
 
 ## 保存与错误恢复
 
 默认只保存在内存；容量和保存策略通过 UserDefaults 保留。
-持久化模式把 `history.json` 写在应用包内：`Barclip.app/Contents/Library/Application Support/history.json`。目录权限 0700，文件权限 0600，JSON 原子写入；文件并未加密。把应用移到废纸篓会连同这份缓存一起删除。全部处理在本机完成，无网络请求。
+持久化模式把 `history.json` 写在应用包内：`Barclip.app/Contents/Library/Application Support/history.json`，图片二进制写在同级 `images/{id}.png`。目录权限 0700，文件权限 0600，JSON 原子写入；文件并未加密。把应用移到废纸篓会连同这份缓存一起删除。全部处理在本机完成，无网络请求。
+
+JSON 只保存文本和图片文件名，避免把位图 base64 进同一份文件。旧版纯文本 JSON 仍可读取。缺失的图片 sidecar 会跳过该条，不让整份历史加载失败。
 
 没有使用 `~/Library/Application Support` 作为正式存储，因为 macOS 删除 `.app` 不会清理该目录。也没有增加开机清理助手：会留下额外进程，且应用不在运行时才能发现卸载。复制应用会带走包内历史；应用包不可写（例如只读安装位置）时保存会失败并提示重试。若以后对应用签名公证，写入包内会破坏签名，需要重新评估存储位置。
 
@@ -39,6 +41,6 @@
 
 ## 资源与范围
 
-一个应用级监控 Task；重复启动不重复监听，停止可重启。SwiftUI LazyVStack 延迟构建记录视图，预览最多 160 字符，原始文本完整保留。单条文本超过 1 MiB 时跳过并提示，避免单条巨型内容长期驻留。
+一个应用级监控 Task；重复启动不重复监听，停止可重启。SwiftUI LazyVStack 延迟构建记录视图，文本预览最多 160 字符，图片列表显示等比缩略图。原始文本和 PNG 完整保留。单条文本超过 1 MiB 或图片超过 8 MiB 时跳过并提示。文本和图片各自按容量裁剪。
 
-敏感/临时标记（ConcealedType、TransientType）及文件类型会被跳过。此筛选依赖源应用标记，不保证识别所有敏感文本。未标记的纯文本仍会作为文本记录。
+敏感/临时标记（ConcealedType、TransientType）及文件类型会被跳过。此筛选依赖源应用标记，不保证识别所有敏感文本。未标记的纯文本仍会作为文本记录。Finder 中复制的文件即使含预览图也不收录。

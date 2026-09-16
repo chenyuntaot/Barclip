@@ -1,15 +1,157 @@
+import AppKit
 import SwiftUI
 
 struct ClipboardMenuView: View {
     @Environment(ClipboardStore.self) private var store
     @State private var showsSettings = false
+    @State private var selectedKind: ClipboardKind
+
+    init(initialKind: ClipboardKind = .text, isShowingSettings: Bool = false) {
+        _selectedKind = State(initialValue: initialKind)
+        _showsSettings = State(initialValue: isShowingSettings)
+    }
 
     var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            if !showsSettings {
+                kindRail
+                    .frame(width: 64)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+                Divider()
+                    .transition(.opacity)
+            }
+            Group {
+                if showsSettings {
+                    settingsColumn
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .offset(x: 18)),
+                            removal: .opacity.combined(with: .offset(x: 18))
+                        ))
+                } else {
+                    mainColumn
+                        .padding(.leading, 12)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .offset(x: -10)),
+                            removal: .opacity.combined(with: .offset(x: -10))
+                        ))
+                }
+            }
+            .frame(width: showsSettings ? 436 : 360)
+            .frame(maxHeight: .infinity, alignment: .top)
+        }
+        .padding(16)
+        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsSettings)
+    }
+
+    private var currentEntries: [ClipboardEntry] {
+        store.entries(for: selectedKind)
+    }
+
+    @ViewBuilder
+    private var kindRail: some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) { railButtons }
+        } else {
+            railButtons
+        }
+    }
+
+    private var railButtons: some View {
+        VStack(spacing: 8) {
+            ForEach(ClipboardKind.allCases) { kind in
+                railButton(title: kind.title, systemImage: kind.systemImage, isSelected: selectedKind == kind) {
+                    selectedKind = kind
+                    showsSettings = false
+                }
+                .help(kind.title)
+                .accessibilityLabel(kind.title)
+                .accessibilityAddTraits(selectedKind == kind ? .isSelected : [])
+            }
+            Spacer(minLength: 12)
+            Divider()
+            railButton(
+                title: "清空历史",
+                systemImage: "trash",
+                disabled: store.isLoading
+            ) {
+                store.clear(selectedKind)
+            }
+            .help("清空当前分类的应用内历史，系统剪贴板内容保持不变")
+            .accessibilityLabel("清空历史")
+            railButton(
+                title: "设置",
+                systemImage: "gearshape",
+                disabled: store.isLoading
+            ) {
+                showsSettings = true
+            }
+            .help("设置")
+            .accessibilityLabel("设置")
+            railButton(title: "退出", systemImage: "power") {
+                NSApp.terminate(nil)
+            }
+            .help("退出")
+            .accessibilityLabel("退出")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private func railButton(
+        title: String,
+        systemImage: String,
+        isSelected: Bool = false,
+        disabled: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.body)
+                    .frame(width: 20, height: 20)
+                Text(title)
+                    .font(.caption2)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .buttonStyle(KindRailButtonStyle(isSelected: isSelected))
+        .disabled(disabled)
+    }
+
+    private var settingsColumn: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Button {
+                    showsSettings = false
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.backward")
+                        Text("返回")
+                    }
+                }
+                .buttonStyle(SettingsBackButtonStyle())
+                .help("返回历史")
+                .accessibilityLabel("返回历史")
+                .disabled(store.isLoading)
+                Spacer(minLength: 0)
+            }
+            ClipboardSettingsView()
+                .disabled(store.isLoading || store.storageError == .load)
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var mainColumn: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("Barclip", systemImage: "clipboard").font(.headline)
                 Spacer()
-                Text("\(store.entries.count) / \(store.capacity)")
+                Text("\(currentEntries.count) / \(store.capacity)")
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
             }
             Divider()
@@ -30,53 +172,163 @@ struct ClipboardMenuView: View {
                 }
                 .disabled(store.isLoading)
             }
-            if showsSettings {
-                ClipboardSettingsView().disabled(store.isLoading || store.storageError == .load)
-            } else if store.isLoading {
+            if store.isLoading {
                 ProgressView("正在读取历史…").frame(maxWidth: .infinity).frame(height: 220)
-            } else if store.entries.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "doc.on.clipboard").font(.largeTitle).foregroundStyle(.secondary)
-                    Text("暂无历史记录").font(.headline)
-                    Text("复制一段文本后，它会出现在这里。")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, minHeight: 160)
+            } else if currentEntries.isEmpty {
+                emptyState
             } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 4) {
-                        ForEach(store.entries) { entry in
-                            Button { store.copy(entry) } label: {
-                                HStack(alignment: .top) {
-                                    Text(entry.preview).lineLimit(3)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    Image(systemName: "doc.on.doc").foregroundStyle(.secondary)
-                                }
-                                .padding(8).contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .help("点击重新复制")
-                            Divider()
-                        }
-                    }
-                }
-                // MenuBarExtra probes the minimum size; a maximum alone lets the list collapse.
-                .frame(minHeight: 180, idealHeight: 280, maxHeight: 320)
+                historyList
             }
-            Text(store.retention == .session ? "历史仅本次运行保留" : "历史保存在本机，重启后保留")
+            Text(store.retention == .session ? "历史仅本次运行保留" : "历史写在应用内，重启后保留")
                 .font(.caption).foregroundStyle(.secondary)
-            Divider()
-            HStack {
-                Button("清空历史", systemImage: "trash", action: store.clear)
-                    .disabled((store.entries.isEmpty && store.storageError == nil) || store.isLoading)
-                    .help("清空应用内历史，系统剪贴板内容保持不变")
-                Button(showsSettings ? "返回历史" : "设置") { showsSettings.toggle() }
-                    .disabled(store.isLoading)
-                Spacer()
-                Button("退出") { NSApp.terminate(nil) }
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 8) {
+            Image(systemName: selectedKind == .text ? "doc.on.clipboard" : "photo")
+                .font(.largeTitle).foregroundStyle(.secondary)
+            Text("暂无历史记录").font(.headline)
+            Text(selectedKind == .text ? "复制一段文本后，它会出现在这里。" : "复制一张图片后，它会出现在这里。")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 160)
+    }
+
+    private var historyList: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 4) {
+                ForEach(currentEntries) { entry in
+                    Button { store.copy(entry) } label: {
+                        HStack(alignment: .top) {
+                            rowContent(for: entry)
+                            Image(systemName: "doc.on.doc").foregroundStyle(.secondary)
+                        }
+                        .padding(8).contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("点击重新复制")
+                    Divider()
+                }
             }
         }
-        .padding(16)
-        .frame(width: 360)
+        // MenuBarExtra probes the minimum size; a maximum alone lets the list collapse.
+        .frame(minHeight: 180, idealHeight: 280, maxHeight: 320)
+    }
+
+    @ViewBuilder
+    private func rowContent(for entry: ClipboardEntry) -> some View {
+        if entry.kind == .image {
+            imagePreview(entry.imagePNG)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            Text(entry.preview).lineLimit(3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private func imagePreview(_ data: Data?) -> some View {
+        if let data, let image = NSImage(data: data) {
+            Image(nsImage: image)
+                .resizable()
+                .interpolation(.medium)
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: .infinity, minHeight: 48, maxHeight: 96)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+        } else {
+            Label("无法预览图片", systemImage: "photo")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct KindRailButtonStyle: ButtonStyle {
+    var isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        KindRailButtonBody(configuration: configuration, isSelected: isSelected)
+    }
+}
+
+private struct KindRailButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    var isSelected: Bool
+    @State private var isHovered = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        configuration.label
+            .multilineTextAlignment(.center)
+            .frame(width: 52, alignment: .center)
+            .padding(.vertical, 10)
+            .foregroundStyle(labelColor)
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .modifier(RailGlassEffect(isActive: isSelected))
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .scaleEffect(hoverScale)
+            .animation(.easeInOut(duration: 0.16), value: isHovered)
+            .animation(.easeInOut(duration: 0.12), value: isSelected)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
+            .onHover { isHovered = $0 && isEnabled }
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private var labelColor: Color {
+        if isSelected { .accentColor }
+        else if isHovered && isEnabled { .primary }
+        else { .secondary }
+    }
+
+    private var hoverScale: CGFloat {
+        if configuration.isPressed { 0.97 }
+        else if isHovered && isEnabled { 1.06 }
+        else { 1 }
+    }
+}
+
+private struct SettingsBackButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        SettingsBackButtonBody(configuration: configuration)
+    }
+}
+
+private struct SettingsBackButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    @State private var isHovered = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        configuration.label
+            .font(.body)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .foregroundStyle(isHovered && isEnabled ? Color.primary : Color.secondary)
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .scaleEffect(configuration.isPressed ? 0.97 : (isHovered && isEnabled ? 1.06 : 1))
+            .animation(.easeInOut(duration: 0.16), value: isHovered)
+            .onHover { isHovered = $0 && isEnabled }
+    }
+}
+
+private struct RailGlassEffect: ViewModifier {
+    var isActive: Bool
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 8, style: .continuous)
+        return glassBody(content: content, shape: shape)
+    }
+
+    @ViewBuilder
+    private func glassBody(content: Content, shape: RoundedRectangle) -> some View {
+        if #available(macOS 26.0, *) {
+            content.glassEffect(isActive ? .regular : .identity, in: shape)
+        } else if isActive {
+            content.background { shape.fill(.ultraThinMaterial) }
+        } else {
+            content
+        }
     }
 }

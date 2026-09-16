@@ -172,6 +172,42 @@ final class HistoryPersistenceTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
     }
+
+    func testPersistentImageUsesSidecarAndSurvivesRestart() async throws {
+        let (store, board) = try makeStore()
+        store.setRetention(.persistent)
+        board.publishImage(TestPNG.pixel)
+        store.poll()
+        await store.finishPendingSave()
+        let images = directory.appending(path: "images")
+        let files = try FileManager.default.contentsOfDirectory(at: images, includingPropertiesForKeys: nil)
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.pathExtension, "png")
+        let (reopened, _) = try makeStore()
+        await reopened.restore()
+        XCTAssertEqual(reopened.imageEntries.first?.imagePNG, TestPNG.pixel)
+        XCTAssertTrue(reopened.entries.isEmpty)
+        reopened.clear(.image)
+        await reopened.finishPendingSave()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: images.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+    }
+
+    func testMissingImageSidecarSkipsEntryWithoutFailingLoad() async throws {
+        let repository = HistoryRepository(fileURL: fileURL)
+        try await repository.save([
+            ClipboardEntry(text: "keep"),
+            ClipboardEntry(imagePNG: TestPNG.pixel)
+        ], revision: 1)
+        let files = try FileManager.default.contentsOfDirectory(
+            at: directory.appending(path: "images"),
+            includingPropertiesForKeys: nil
+        )
+        try FileManager.default.removeItem(at: files[0])
+        let restored = try await repository.load()
+        XCTAssertEqual(restored.map(\.text), ["keep"])
+        XCTAssertTrue(restored.allSatisfy { $0.kind == .text })
+    }
 }
 
 @MainActor
@@ -179,8 +215,25 @@ private final class PersistencePasteboard: PasteboardAccess {
     var changeCount = 0
     var isAccessDenied = false
     var containsText = true
+    var containsImage = false
     var text: String?
-    func publish(_ value: String) { text = value; changeCount += 1 }
+    var png: Data?
+    func publish(_ value: String) {
+        text = value
+        png = nil
+        containsText = true
+        containsImage = false
+        changeCount += 1
+    }
+    func publishImage(_ data: Data) {
+        png = data
+        text = nil
+        containsText = false
+        containsImage = true
+        changeCount += 1
+    }
     func readText() -> String? { text }
+    func readPNG() -> Data? { png }
     func writeText(_ text: String) -> Bool { publish(text); return true }
+    func writePNG(_ data: Data) -> Bool { publishImage(data); return true }
 }

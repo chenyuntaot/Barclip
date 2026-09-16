@@ -6,7 +6,9 @@ import OSLog
 @Observable
 final class ClipboardStore {
     static let capacityOptions = [10, 25, 50, 100, 200]
+    static let maxImageBytes = 8_388_608
     private(set) var entries: [ClipboardEntry] = []
+    private(set) var imageEntries: [ClipboardEntry] = []
     private(set) var capacity: Int
     private(set) var retention: RetentionPolicy
     private(set) var message: String?
@@ -51,6 +53,13 @@ final class ClipboardStore {
 
     deinit { monitor?.cancel() }
 
+    func entries(for kind: ClipboardKind) -> [ClipboardEntry] {
+        switch kind {
+        case .text: entries
+        case .image: imageEntries
+        }
+    }
+
     func start() {
         guard monitor == nil else { return }
         monitor = Task { [weak self] in
@@ -80,6 +89,16 @@ final class ClipboardStore {
         let count = pasteboard.changeCount
         guard count != lastChangeCount || wasDenied else { return }
         lastChangeCount = count
+        if pasteboard.containsImage {
+            guard let png = pasteboard.readPNG() else {
+                message = "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。"
+                Self.logger.error("Pasteboard image read failed")
+                return
+            }
+            guard pasteboard.changeCount == count else { return }
+            recordImage(png)
+            return
+        }
         guard pasteboard.containsText else { return }
         guard let text = pasteboard.readText() else {
             message = "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。"
@@ -109,11 +128,25 @@ final class ClipboardStore {
         persist()
     }
 
+    private func recordImage(_ data: Data) {
+        guard !data.isEmpty else { return }
+        guard data.count <= Self.maxImageBytes else {
+            message = "已跳过超过 8 MB 的图片。"
+            return
+        }
+        imageEntries.removeAll { $0.imagePNG == data }
+        imageEntries.insert(ClipboardEntry(imagePNG: data), at: 0)
+        imageEntries = Array(imageEntries.prefix(capacity))
+        message = nil
+        persist()
+    }
+
     func setCapacity(_ value: Int) {
         guard !isLoading, storageError != .load, Self.capacityOptions.contains(value) else { return }
         capacity = value
         defaults.set(value, forKey: "historyCapacity")
         entries = Array(entries.prefix(value))
+        imageEntries = Array(imageEntries.prefix(value))
         persist()
     }
 
@@ -124,9 +157,15 @@ final class ClipboardStore {
         persist()
     }
 
-    func clear() {
+    func clear(_ kind: ClipboardKind? = nil) {
         guard !isLoading else { return }
-        entries.removeAll()
+        switch kind {
+        case .text: entries.removeAll()
+        case .image: imageEntries.removeAll()
+        case nil:
+            entries.removeAll()
+            imageEntries.removeAll()
+        }
         lastChangeCount = pasteboard.changeCount
         message = nil
         didRestore = true
@@ -135,13 +174,24 @@ final class ClipboardStore {
     }
 
     func copy(_ entry: ClipboardEntry) {
-        guard pasteboard.writeText(entry.text) else {
-            message = "复制失败，请重试。"
-            Self.logger.error("Pasteboard text write failed")
-            return
+        switch entry.kind {
+        case .text:
+            guard pasteboard.writeText(entry.text) else {
+                message = "复制失败，请重试。"
+                Self.logger.error("Pasteboard text write failed")
+                return
+            }
+            lastChangeCount = pasteboard.changeCount
+            record(entry.text)
+        case .image:
+            guard let png = entry.imagePNG, pasteboard.writePNG(png) else {
+                message = "复制失败，请重试。"
+                Self.logger.error("Pasteboard image write failed")
+                return
+            }
+            lastChangeCount = pasteboard.changeCount
+            recordImage(png)
         }
-        lastChangeCount = pasteboard.changeCount
-        record(entry.text)
         message = "已复制，可使用 ⌘V 粘贴。"
     }
 
@@ -152,12 +202,27 @@ final class ClipboardStore {
         do {
             if retention == .persistent {
                 let restored = try await repository.load()
-                var seen = Set<String>()
-                entries = Array(restored.filter {
-                    !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        && $0.text.utf8.count <= 1_048_576
-                        && seen.insert($0.text).inserted
-                }.prefix(capacity))
+                var seenText = Set<String>()
+                var seenImage = Set<Data>()
+                var texts: [ClipboardEntry] = []
+                var images: [ClipboardEntry] = []
+                for entry in restored {
+                    switch entry.kind {
+                    case .text:
+                        guard !entry.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                              entry.text.utf8.count <= 1_048_576,
+                              seenText.insert(entry.text).inserted else { continue }
+                        texts.append(entry)
+                    case .image:
+                        guard let png = entry.imagePNG,
+                              !png.isEmpty,
+                              png.count <= Self.maxImageBytes,
+                              seenImage.insert(png).inserted else { continue }
+                        images.append(entry)
+                    }
+                }
+                entries = Array(texts.prefix(capacity))
+                imageEntries = Array(images.prefix(capacity))
             } else {
                 try await repository.save(nil, revision: revision)
             }
@@ -181,7 +246,7 @@ final class ClipboardStore {
     private func persist() {
         revision += 1
         let currentRevision = revision
-        let snapshot = retention == .persistent ? entries : nil
+        let snapshot = retention == .persistent ? entries + imageEntries : nil
         let repository = repository
         saveTask = Task { [weak self] in
             do {
