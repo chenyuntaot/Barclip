@@ -24,7 +24,7 @@ struct ClipboardSettingsView: View {
                         Text(policy.title).tag(policy)
                     }
                 }
-                Text("选择重启后保留时，文本会保存在本机。切换为退出后清空会删除磁盘缓存，当前记录仍可使用。")
+                Text("选择重启后保留时，文本会写进应用包内。把应用移到废纸篓会一起删掉这些记录。切换为退出后清空会删除磁盘缓存，当前记录仍可使用。")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

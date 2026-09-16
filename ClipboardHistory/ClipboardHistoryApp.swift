@@ -5,7 +5,7 @@ struct ClipboardHistoryApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        MenuBarExtra("剪贴板历史", systemImage: "clipboard") {
+        MenuBarExtra("Barclip", systemImage: "clipboard") {
             ClipboardMenuView().environment(delegate.store)
         }
         .menuBarExtraStyle(.window)

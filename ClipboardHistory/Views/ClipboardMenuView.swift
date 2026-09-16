@@ -7,7 +7,7 @@ struct ClipboardMenuView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("剪贴板历史", systemImage: "clipboard").font(.headline)
+                Label("Barclip", systemImage: "clipboard").font(.headline)
                 Spacer()
                 Text("\(store.entries.count) / \(store.capacity)")
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)

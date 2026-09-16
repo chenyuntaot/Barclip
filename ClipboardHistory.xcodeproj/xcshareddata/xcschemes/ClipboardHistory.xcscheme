@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CDEA1CD494D347301FD5BAA8"
-               BuildableName = "ClipboardHistory.app"
+               BuildableName = "Barclip.app"
                BlueprintName = "ClipboardHistory"
                ReferencedContainer = "container:ClipboardHistory.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CDEA1CD494D347301FD5BAA8"
-            BuildableName = "ClipboardHistory.app"
+            BuildableName = "Barclip.app"
             BlueprintName = "ClipboardHistory"
             ReferencedContainer = "container:ClipboardHistory.xcodeproj">
          </BuildableReference>
@@ -69,7 +69,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CDEA1CD494D347301FD5BAA8"
-            BuildableName = "ClipboardHistory.app"
+            BuildableName = "Barclip.app"
             BlueprintName = "ClipboardHistory"
             ReferencedContainer = "container:ClipboardHistory.xcodeproj">
          </BuildableReference>
@@ -86,7 +86,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CDEA1CD494D347301FD5BAA8"
-            BuildableName = "ClipboardHistory.app"
+            BuildableName = "Barclip.app"
             BlueprintName = "ClipboardHistory"
             ReferencedContainer = "container:ClipboardHistory.xcodeproj">
          </BuildableReference>

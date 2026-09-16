@@ -11,14 +11,17 @@ targets:
   ClipboardHistory:
     type: application
     platform: macOS
+    productName: Barclip
     sources:
       - path: ClipboardHistory
         excludes: [Info.plist]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: local.ClipboardHistory
+        PRODUCT_NAME: Barclip
+        PRODUCT_MODULE_NAME: ClipboardHistory
         INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_CFBundleDisplayName: 剪贴板历史
+        INFOPLIST_KEY_CFBundleDisplayName: Barclip
         ENABLE_HARDENED_RUNTIME: YES
   ClipboardHistoryTests:
     type: bundle.unit-test

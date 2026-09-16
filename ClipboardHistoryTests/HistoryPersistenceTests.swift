@@ -128,6 +128,50 @@ final class HistoryPersistenceTests: XCTestCase {
         let restored = try await repository.load()
         XCTAssertTrue(restored.isEmpty)
     }
+
+    func testHistoryURLLivesInsideApplicationBundle() {
+        let app = URL(filePath: "/Applications/Barclip.app")
+        let url = HistoryRepository.historyURL(inAppBundle: app)
+        XCTAssertEqual(
+            url.path,
+            "/Applications/Barclip.app/Contents/Library/Application Support/history.json"
+        )
+    }
+
+    func testDeletingAppBundleRemovesHistory() async throws {
+        let app = directory.appending(path: "Barclip.app")
+        let bundled = HistoryRepository.historyURL(inAppBundle: app)
+        let repository = HistoryRepository(fileURL: bundled)
+        try await repository.save([ClipboardEntry(text: "secret")], revision: 1)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: bundled.path))
+        try FileManager.default.removeItem(at: app)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: bundled.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: app.path))
+    }
+
+    func testLegacyApplicationSupportIsMigratedThenRemoved() async throws {
+        let app = directory.appending(path: "Barclip.app")
+        let bundled = HistoryRepository.historyURL(inAppBundle: app)
+        let legacy = directory.appending(path: "ClipboardHistory")
+        try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
+        try JSONEncoder().encode([ClipboardEntry(text: "old cache")])
+            .write(to: legacy.appending(path: "history.json"))
+        let repository = HistoryRepository(fileURL: bundled, legacyDirectory: legacy)
+        let restored = try await repository.load()
+        XCTAssertEqual(restored.map(\.text), ["old cache"])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: bundled.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
+    }
+
+    func testClearRemovesLegacyDirectory() async throws {
+        let legacy = directory.appending(path: "ClipboardHistory")
+        try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
+        try Data("[]".utf8).write(to: legacy.appending(path: "history.json"))
+        let repository = HistoryRepository(fileURL: fileURL, legacyDirectory: legacy)
+        try await repository.save(nil, revision: 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+    }
 }
 
 @MainActor

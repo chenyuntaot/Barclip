@@ -3,7 +3,7 @@
 ## 平台与入口
 
 原生 Swift 6 + SwiftUI，最低 macOS 14（Observation）。不引入第三方运行依赖。
-`ClipboardHistoryApp` 只创建 `MenuBarExtra`，不创建主窗口。生成的 Info.plist 设置 `LSUIElement = YES`，AppDelegate 同时设置 `.accessory` 激活策略。
+`ClipboardHistoryApp` 只创建 `MenuBarExtra`，不创建主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。
 
 使用菜单栏弹出面板中的设置页，避免为两个设置项引入独立窗口。`ClipboardMenuView` 本地管理页面切换，Store 通过 Environment 注入。
 
@@ -25,7 +25,11 @@
 ## 保存与错误恢复
 
 默认只保存在内存；容量和保存策略通过 UserDefaults 保留。
-持久化模式使用 `~/Library/Application Support/ClipboardHistory/history.json`。目录权限 0700，文件权限 0600，JSON 原子写入；文件并未加密。全部处理在本机完成，无网络请求。
+持久化模式把 `history.json` 写在应用包内：`Barclip.app/Contents/Library/Application Support/history.json`。目录权限 0700，文件权限 0600，JSON 原子写入；文件并未加密。把应用移到废纸篓会连同这份缓存一起删除。全部处理在本机完成，无网络请求。
+
+没有使用 `~/Library/Application Support` 作为正式存储，因为 macOS 删除 `.app` 不会清理该目录。也没有增加开机清理助手：会留下额外进程，且应用不在运行时才能发现卸载。复制应用会带走包内历史；应用包不可写（例如只读安装位置）时保存会失败并提示重试。若以后对应用签名公证，写入包内会破坏签名，需要重新评估存储位置。
+
+首次读取或写入时，若仍存在旧路径 `~/Library/Application Support/ClipboardHistory/`，会迁入应用包并删除旧目录，避免卸载后残留文本。
 
 选择 JSON 是因为第一期记录上限为 200，无复杂查询需求；未引入数据库或 SwiftData。以后若引入搜索索引、大规模媒体或大量记录，再评估存储方案。
 

@@ -1,4 +1,4 @@
-# 剪贴板历史（macOS）
+# Barclip（macOS）
 
 Swift + SwiftUI 菜单栏应用，支持 macOS 14 及以上，不显示 Dock 图标。
 
@@ -6,7 +6,7 @@ Swift + SwiftUI 菜单栏应用，支持 macOS 14 及以上，不显示 Dock 图
 - 点击历史记录重新复制，使用 ⌘V 粘贴。
 - 一键清空应用历史和本机缓存，不改动当前系统剪贴板。
 - 设置页可选择保留 10 / 25 / 50 / 100 / 200 条，默认 50 条。
-- 设置页可选择「退出后清空」或「重启后保留」，默认退出后清空。
+- 设置页可选择「退出后清空」或「重启后保留」，默认退出后清空。重启后保留会把历史写进 `Barclip.app` 内部，删除应用时一起删除。
 
 ## 运行
 
@@ -15,7 +15,7 @@ Swift + SwiftUI 菜单栏应用，支持 macOS 14 及以上，不显示 Dock 图
 ```sh
 xcodebuild -project ClipboardHistory.xcodeproj -scheme ClipboardHistory \
   -configuration Debug -derivedDataPath build build CODE_SIGNING_ALLOWED=NO
-open build/Build/Products/Debug/ClipboardHistory.app
+open build/Build/Products/Debug/Barclip.app
 ```
 
 菜单栏点击剪贴板图标即可使用。首次复制时，如系统询问剪贴板访问权限，请根据需要允许。
