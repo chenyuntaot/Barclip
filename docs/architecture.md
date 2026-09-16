@@ -13,7 +13,8 @@
 - `Models/AppInfo.swift`：显示名、版本、版权、开发者与仓库等关于页元数据。
 - `Services/PasteboardService.swift`：AppKit 剪贴板读写、文本与位图筛选、访问拒绝判断。
 - `Services/HistoryRepository.swift`：actor 隔离 JSON 元数据与图片 sidecar 读写。
-- `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。
+- `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。状态提示用 `StatusMessage` 枚举，界面按 `allowsRetry` 决定是否显示重试，不再用中文字符串前缀判断。
+- `Localizable.xcstrings`：简体中文为源语言，另含英文。界面随系统语言切换，应用内不提供语言选项。
 - `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示、设置与关于入口。
 - `Views/ClipboardSettingsView.swift`：容量、保存策略，以及底部程序版本 / 关于我们 / 版权入口。
 - `Views/ClipboardAboutView.swift`：程序版本和关于我们页面，展示编译后的应用图标。
@@ -40,6 +41,14 @@ JSON 只保存文本和图片文件名，避免把位图 base64 进同一份文�
 磁盘操作在 actor 上执行，不在主线程编码、读取和写入。每份快照带单调递增版本，晚到的旧版本不会恢复已清空的数据。清空与切换为会话模式删除历史文件。正常退出会等待最新写入；保存失败时允许返回重试或明确选择仍然退出。
 
 缓存损坏或不可读取时保留原文件、暂停采集，提供重试及清空入口，避免新记录静默覆盖原缓存。剪贴板访问拒绝、文本读取失败、写入失败均有状态提示。日志不记录文本内容、文件原始数据或敏感标识。
+
+## 本地化
+
+界面只做简体中文和英文，跟随 macOS 系统语言，不在设置里放语言开关。源文案是中文，放在 `ClipboardHistory/Localizable.xcstrings`；英文写在同一份目录的 `en` 本地化里。工程 `developmentRegion` 为 `zh-Hans`。
+
+SwiftUI 字面量（`Text("设置")`、`Section`、`help`、`accessibilityLabel` 等）走 `LocalizedStringKey`。Store、模型标题、退出确认框没有 SwiftUI 环境，使用 `String(localized:)`，同样查这份目录。`Barclip`、开发者姓名、邮箱、仓库地址和版权中的姓名不翻译。
+
+状态提示不再用 `message.hasPrefix("无法读取")` 这类易随翻译失效的判断，改为 `StatusMessage.allowsRetry`。
 
 ## 资源与范围
 

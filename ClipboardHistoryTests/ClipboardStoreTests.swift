@@ -75,7 +75,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertNotNil(store.message)
         board.publishImage(Data(count: ClipboardStore.maxImageBytes + 1)); store.poll()
         XCTAssertTrue(store.imageEntries.isEmpty)
-        XCTAssertEqual(store.message, "已跳过超过 30 MB 的图片。")
+        XCTAssertEqual(store.message, .skippedOversizedImage)
     }
 
     func testImageOrderingDeduplicationAndIndependenceFromText() async throws {
@@ -127,7 +127,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(store.entries.map(\.text), ["text"])
         board.writeSucceeds = false
         store.copy(entry)
-        XCTAssertEqual(store.message, "复制失败，请重试。")
+        XCTAssertEqual(store.message, .copyFailed)
         await store.finishPendingSave()
     }
 
@@ -159,7 +159,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(store.entries.map(\.text), ["first", "second"])
         board.writeSucceeds = false
         store.copy(entry)
-        XCTAssertEqual(store.message, "复制失败，请重试。")
+        XCTAssertEqual(store.message, .copyFailed)
         await store.finishPendingSave()
     }
 

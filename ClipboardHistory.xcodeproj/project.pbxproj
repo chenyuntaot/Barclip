@@ -10,6 +10,7 @@
 		04EBF929C153F9DBA4980A5D /* ClipboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 781AE9EFAE02664A9D0F32A1 /* ClipboardStore.swift */; };
 		262596BB305AB5DE0069D768 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 262596BA305AB5DE0069D768 /* AppIcon.icon */; };
 		4B22C3D15E6F9038B7C01E52 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A11B2C04D5E8F27A6B90D41 /* Assets.xcassets */; };
+		B22D1E4F5A6B7C829D03E1F4 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A11C0D3E4F5A6B718C92D0E3 /* Localizable.xcstrings */; };
 		1C4075549B4D963807716E8A /* PasteboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36AA6CBB86886F911183A4C /* PasteboardService.swift */; };
 		2F84B1C9D0E67A35B8C14D70 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C91E2A04B6D8F13A5E90C24 /* AppInfo.swift */; };
 		4068A2C46D49EE8990ECF38A /* ClipboardSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48F213BCD34C61EA004E41A /* ClipboardSettingsView.swift */; };
@@ -37,6 +38,7 @@
 		05088D55E562BEF1F0F1D06C /* ViewRenderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewRenderingTests.swift; sourceTree = "<group>"; };
 		262596BA305AB5DE0069D768 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		3A11B2C04D5E8F27A6B90D41 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A11C0D3E4F5A6B718C92D0E3 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		3092AFB309DFE4A367257704 /* ClipboardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardEntry.swift; sourceTree = "<group>"; };
 		3CE24E545D028D3D69ACCDBA /* ClipboardHistoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryApp.swift; sourceTree = "<group>"; };
 		41F6DAC2C92E2645750A3DC8 /* ClipboardMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMenuView.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			children = (
 				3A11B2C04D5E8F27A6B90D41 /* Assets.xcassets */,
 				3CE24E545D028D3D69ACCDBA /* ClipboardHistoryApp.swift */,
+				A11C0D3E4F5A6B718C92D0E3 /* Localizable.xcstrings */,
 				B7218AFDAB91636620B0B62C /* Models */,
 				B7BB562F0371E42104663400 /* Services */,
 				87222ECDAA8E8E6861E3A759 /* Stores */,
@@ -180,11 +183,12 @@
 				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = 89EFCD6C2A9E62E7926E01C2 /* Build configuration list for PBXProject "ClipboardHistory" */;
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = B8219C9FC936AF0DA456563F;
 			minimizedProjectReferenceProxies = 1;
@@ -206,6 +210,7 @@
 			files = (
 				262596BB305AB5DE0069D768 /* AppIcon.icon in Resources */,
 				4B22C3D15E6F9038B7C01E52 /* Assets.xcassets in Resources */,
+				B22D1E4F5A6B7C829D03E1F4 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,7 +317,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Barclip;
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -321,7 +326,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = local.ClipboardHistory;
 				PRODUCT_MODULE_NAME = ClipboardHistory;
 				PRODUCT_NAME = Barclip;
@@ -349,7 +354,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Barclip;
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -358,7 +363,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = local.ClipboardHistory;
 				PRODUCT_MODULE_NAME = ClipboardHistory;
 				PRODUCT_NAME = Barclip;

@@ -79,10 +79,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             await store.finishPendingSave()
             if store.storageError == .save {
                 let alert = NSAlert()
-                alert.messageText = "本机缓存尚未成功更新"
-                alert.informativeText = "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。"
-                alert.addButton(withTitle: "返回")
-                alert.addButton(withTitle: "仍然退出")
+                alert.messageText = String(localized: "本机缓存尚未成功更新")
+                alert.informativeText = String(localized: "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。")
+                alert.addButton(withTitle: String(localized: "返回"))
+                alert.addButton(withTitle: String(localized: "仍然退出"))
                 if alert.runModal() == .alertFirstButtonReturn {
                     store.start()
                     sender.reply(toApplicationShouldTerminate: false)

@@ -87,29 +87,29 @@ struct ClipboardMenuView: View {
             Spacer(minLength: 12)
             Divider()
             railButton(
-                title: "清空历史",
+                title: String(localized: "清空历史"),
                 systemImage: "trash",
                 disabled: store.isLoading
             ) {
                 store.clear(selectedKind)
             }
-            .help("清空当前分类的应用内历史，系统剪贴板内容保持不变")
-            .accessibilityLabel("清空历史")
+            .help(String(localized: "清空当前分类的应用内历史，系统剪贴板内容保持不变"))
+            .accessibilityLabel(String(localized: "清空历史"))
             railButton(
-                title: "设置",
+                title: String(localized: "设置"),
                 systemImage: "gearshape",
                 disabled: store.isLoading
             ) {
                 showsAbout = false
                 showsSettings = true
             }
-            .help("设置")
-            .accessibilityLabel("设置")
-            railButton(title: "退出", systemImage: "power") {
+            .help(String(localized: "设置"))
+            .accessibilityLabel(String(localized: "设置"))
+            railButton(title: String(localized: "退出"), systemImage: "power") {
                 NSApp.terminate(nil)
             }
-            .help("退出")
-            .accessibilityLabel("退出")
+            .help(String(localized: "退出"))
+            .accessibilityLabel(String(localized: "退出"))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -138,7 +138,7 @@ struct ClipboardMenuView: View {
     }
 
     private var settingsColumn: some View {
-        accessoryColumn(backHelp: "返回历史", backDisabled: store.isLoading) {
+        accessoryColumn(backHelp: String(localized: "返回历史"), backDisabled: store.isLoading) {
             closeAccessoryPanels()
         } content: {
             ClipboardSettingsView(onOpenAbout: { showsAbout = true })
@@ -147,7 +147,7 @@ struct ClipboardMenuView: View {
     }
 
     private var aboutColumn: some View {
-        accessoryColumn(backHelp: "返回设置") {
+        accessoryColumn(backHelp: String(localized: "返回设置")) {
             showsAbout = false
         } content: {
             ClipboardAboutView()
@@ -204,8 +204,8 @@ struct ClipboardMenuView: View {
                     .font(.callout)
                 Button("重新检查", action: store.retry)
             } else if let message = store.message {
-                Text(message).font(.caption).foregroundStyle(.secondary)
-                if message.hasPrefix("无法读取") {
+                Text(message.text).font(.caption).foregroundStyle(.secondary)
+                if message.allowsRetry {
                     Button("重试", action: store.retry)
                 }
             }

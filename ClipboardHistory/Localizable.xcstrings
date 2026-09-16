@@ -1,0 +1,572 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "%@ / %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ 条" : {
+
+    },
+    "%d 条" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d items"
+          }
+        }
+      }
+    },
+    "%lld 条" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld items"
+          }
+        }
+      }
+    },
+    "Barclip" : {
+
+    },
+    "仍然退出" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit Anyway"
+          }
+        }
+      }
+    },
+    "保存策略" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Policy"
+          }
+        }
+      }
+    },
+    "保留条数" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        }
+      }
+    },
+    "关于我们" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        }
+      }
+    },
+    "剪贴板访问被拒绝，请在系统设置中允许此应用读取剪贴板。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clipboard access was denied. Allow this app to read the clipboard in System Settings."
+          }
+        }
+      }
+    },
+    "历史仅本次运行保留" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History is kept for this session only"
+          }
+        }
+      }
+    },
+    "历史写在应用内，重启后保留" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History is saved in the app and kept after restart"
+          }
+        }
+      }
+    },
+    "历史容量" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History Limit"
+          }
+        }
+      }
+    },
+    "历史记录" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        }
+      }
+    },
+    "图片" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Images"
+          }
+        }
+      }
+    },
+    "在默认应用中打开" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in the default app"
+          }
+        }
+      }
+    },
+    "复制一张图片后，它会出现在这里。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy an image and it will show up here."
+          }
+        }
+      }
+    },
+    "复制一段文本后，它会出现在这里。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy some text and it will show up here."
+          }
+        }
+      }
+    },
+    "复制失败，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy failed. Please retry."
+          }
+        }
+      }
+    },
+    "已复制，可使用 ⌘V 粘贴。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied. Paste with ⌘V."
+          }
+        }
+      }
+    },
+    "已跳过超过 1 MB 的文本。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skipped text larger than 1 MB."
+          }
+        }
+      }
+    },
+    "已跳过超过 30 MB 的图片。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skipped an image larger than 30 MB."
+          }
+        }
+      }
+    },
+    "开发者" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Developer"
+          }
+        }
+      }
+    },
+    "打开程序版本和关于我们" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open version and about"
+          }
+        }
+      }
+    },
+    "文本" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text"
+          }
+        }
+      }
+    },
+    "文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text and images each keep this many items. Older items are removed when the limit is exceeded. Lowering the limit takes effect immediately."
+          }
+        }
+      }
+    },
+    "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read the clipboard. Check clipboard access in System Settings, then retry."
+          }
+        }
+      }
+    },
+    "无法读取本机历史，已暂停记录。请重试，或清空历史后继续。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read local history. Recording is paused. Retry, or clear history to continue."
+          }
+        }
+      }
+    },
+    "无法预览图片" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't Preview Image"
+          }
+        }
+      }
+    },
+    "暂无历史记录" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No History Yet"
+          }
+        }
+      }
+    },
+    "本机缓存尚未成功更新" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local cache is not up to date"
+          }
+        }
+      }
+    },
+    "本机缓存更新失败，退出后可能丢失记录或保留旧缓存。请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't update the local cache. You may lose new items or keep an old cache after quitting. Please retry."
+          }
+        }
+      }
+    },
+    "正在读取历史…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading history…"
+          }
+        }
+      }
+    },
+    "清空历史" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear History"
+          }
+        }
+      }
+    },
+    "清空当前分类的应用内历史，系统剪贴板内容保持不变" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clears this category in Barclip. The system clipboard is left unchanged."
+          }
+        }
+      }
+    },
+    "点击重新复制" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to copy again"
+          }
+        }
+      }
+    },
+    "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitting now may lose the latest items or keep an old cache. You can go back and retry."
+          }
+        }
+      }
+    },
+    "程序版本 %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        }
+      }
+    },
+    "程序版本 %@，关于我们，%@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@, About, %@"
+          }
+        }
+      }
+    },
+    "程序版本和关于我们" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version and About"
+          }
+        }
+      }
+    },
+    "联系邮箱" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        }
+      }
+    },
+    "设置" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "返回" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "返回历史" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to History"
+          }
+        }
+      }
+    },
+    "返回设置" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to Settings"
+          }
+        }
+      }
+    },
+    "退出" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        }
+      }
+    },
+    "退出后清空" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear on Quit"
+          }
+        }
+      }
+    },
+    "选择重启后保留时，文本和图片会写进应用包内。把应用移到废纸篓会一起删掉这些记录。切换为退出后清空会删除磁盘缓存，当前记录仍可使用。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep After Restart writes text and images inside the app bundle. Moving the app to Trash deletes that history. Switching to Clear on Quit deletes the disk cache; current items remain available."
+          }
+        }
+      }
+    },
+    "重启后保留" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep After Restart"
+          }
+        }
+      }
+    },
+    "重新检查" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Again"
+          }
+        }
+      }
+    },
+    "重试" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        }
+      }
+    },
+    "重试缓存操作" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry Cache"
+          }
+        }
+      }
+    },
+    "项目仓库" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

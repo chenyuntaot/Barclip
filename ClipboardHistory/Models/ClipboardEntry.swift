@@ -8,8 +8,8 @@ enum ClipboardKind: String, CaseIterable, Identifiable, Sendable {
 
     var title: String {
         switch self {
-        case .text: "文本"
-        case .image: "图片"
+        case .text: String(localized: "文本")
+        case .image: String(localized: "图片")
         }
     }
 
@@ -56,8 +56,8 @@ enum RetentionPolicy: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .session: "退出后清空"
-        case .persistent: "重启后保留"
+        case .session: String(localized: "退出后清空")
+        case .persistent: String(localized: "重启后保留")
         }
     }
 }

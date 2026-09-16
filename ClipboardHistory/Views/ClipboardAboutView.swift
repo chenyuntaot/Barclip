@@ -23,9 +23,9 @@ struct ClipboardAboutView: View {
                 .accessibilityElement(children: .combine)
             }
             Section("关于我们") {
-                aboutRow(title: "开发者", value: AppInfo.developer)
-                aboutLink(title: "联系邮箱", value: AppInfo.contactEmail, destination: AppInfo.mailtoURL)
-                aboutLink(title: "项目仓库", value: AppInfo.repositoryURL.absoluteString, destination: AppInfo.repositoryURL)
+                aboutRow(title: String(localized: "开发者"), value: AppInfo.developer)
+                aboutLink(title: String(localized: "联系邮箱"), value: AppInfo.contactEmail, destination: AppInfo.mailtoURL)
+                aboutLink(title: String(localized: "项目仓库"), value: AppInfo.repositoryURL.absoluteString, destination: AppInfo.repositoryURL)
             }
             Section {
                 Text(AppInfo.copyright)

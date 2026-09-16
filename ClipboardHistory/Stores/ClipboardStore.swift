@@ -11,18 +11,47 @@ final class ClipboardStore {
     private(set) var imageEntries: [ClipboardEntry] = []
     private(set) var capacity: Int
     private(set) var retention: RetentionPolicy
-    private(set) var message: String?
+    private(set) var message: StatusMessage?
     private(set) var accessDenied = false
     private(set) var isLoading = false
     private(set) var storageError: StorageError?
+
+    enum StatusMessage: Equatable, Sendable {
+        case pasteboardReadFailed
+        case skippedOversizedText
+        case skippedOversizedImage
+        case copyFailed
+        case copied
+
+        var text: String {
+            switch self {
+            case .pasteboardReadFailed:
+                String(localized: "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。")
+            case .skippedOversizedText:
+                String(localized: "已跳过超过 1 MB 的文本。")
+            case .skippedOversizedImage:
+                String(localized: "已跳过超过 30 MB 的图片。")
+            case .copyFailed:
+                String(localized: "复制失败，请重试。")
+            case .copied:
+                String(localized: "已复制，可使用 ⌘V 粘贴。")
+            }
+        }
+
+        var allowsRetry: Bool {
+            self == .pasteboardReadFailed
+        }
+    }
 
     enum StorageError {
         case load, save
 
         var message: String {
             switch self {
-            case .load: "无法读取本机历史，已暂停记录。请重试，或清空历史后继续。"
-            case .save: "本机缓存更新失败，退出后可能丢失记录或保留旧缓存。请重试。"
+            case .load:
+                String(localized: "无法读取本机历史，已暂停记录。请重试，或清空历史后继续。")
+            case .save:
+                String(localized: "本机缓存更新失败，退出后可能丢失记录或保留旧缓存。请重试。")
             }
         }
     }
@@ -91,7 +120,7 @@ final class ClipboardStore {
         lastChangeCount = count
         if pasteboard.containsImage {
             guard let png = pasteboard.readPNG() else {
-                message = "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。"
+                message = .pasteboardReadFailed
                 Self.logger.error("Pasteboard image read failed")
                 return
             }
@@ -101,7 +130,7 @@ final class ClipboardStore {
         }
         guard pasteboard.containsText else { return }
         guard let text = pasteboard.readText() else {
-            message = "无法读取剪贴板，请检查系统的剪贴板访问设置后重试。"
+            message = .pasteboardReadFailed
             Self.logger.error("Pasteboard text read failed")
             return
         }
@@ -118,7 +147,7 @@ final class ClipboardStore {
     private func record(_ text: String) {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         guard text.utf8.count <= 1_048_576 else {
-            message = "已跳过超过 1 MB 的文本。"
+            message = .skippedOversizedText
             return
         }
         entries.removeAll { $0.text == text }
@@ -131,7 +160,7 @@ final class ClipboardStore {
     private func recordImage(_ data: Data) {
         guard !data.isEmpty else { return }
         guard data.count <= Self.maxImageBytes else {
-            message = "已跳过超过 30 MB 的图片。"
+            message = .skippedOversizedImage
             return
         }
         imageEntries.removeAll { $0.imagePNG == data }
@@ -177,7 +206,7 @@ final class ClipboardStore {
         switch entry.kind {
         case .text:
             guard pasteboard.writeText(entry.text) else {
-                message = "复制失败，请重试。"
+                message = .copyFailed
                 Self.logger.error("Pasteboard text write failed")
                 return
             }
@@ -185,14 +214,14 @@ final class ClipboardStore {
             record(entry.text)
         case .image:
             guard let png = entry.imagePNG, pasteboard.writePNG(png) else {
-                message = "复制失败，请重试。"
+                message = .copyFailed
                 Self.logger.error("Pasteboard image write failed")
                 return
             }
             lastChangeCount = pasteboard.changeCount
             recordImage(png)
         }
-        message = "已复制，可使用 ⌘V 粘贴。"
+        message = .copied
     }
 
     func restore() async {

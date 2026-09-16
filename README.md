@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
   <img src="https://img.shields.io/badge/SwiftUI-native-0071E3" alt="SwiftUI">
-  <img src="https://img.shields.io/badge/version-1.0-2ea44f" alt="Version 1.0">
+  <img src="https://img.shields.io/badge/version-1.0.1-2ea44f" alt="Version 1.0.1">
 </p>
 
 <p align="center">
@@ -37,6 +37,7 @@
 - **容量可调** — 10 / 25 / 50 / 100 / 200 条，文本和图片各自计数，默认 50。
 - **两种保存策略** — 退出后清空（默认），或重启后保留（写进 `Barclip.app` 内部，删除应用时一起删除）。
 - **本机完成** — 不上传剪贴板内容，没有网络请求。
+- **中文 / English** — 界面跟随 macOS 系统语言，只提供简体中文和英文。
 
 ## 要求
 
