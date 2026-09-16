@@ -6,7 +6,7 @@ import OSLog
 @Observable
 final class ClipboardStore {
     static let capacityOptions = [10, 25, 50, 100, 200]
-    static let maxImageBytes = 8_388_608
+    static let maxImageBytes = 30 * 1_048_576
     private(set) var entries: [ClipboardEntry] = []
     private(set) var imageEntries: [ClipboardEntry] = []
     private(set) var capacity: Int
@@ -131,7 +131,7 @@ final class ClipboardStore {
     private func recordImage(_ data: Data) {
         guard !data.isEmpty else { return }
         guard data.count <= Self.maxImageBytes else {
-            message = "已跳过超过 8 MB 的图片。"
+            message = "已跳过超过 30 MB 的图片。"
             return
         }
         imageEntries.removeAll { $0.imagePNG == data }

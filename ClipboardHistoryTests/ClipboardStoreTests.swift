@@ -75,7 +75,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertNotNil(store.message)
         board.publishImage(Data(count: ClipboardStore.maxImageBytes + 1)); store.poll()
         XCTAssertTrue(store.imageEntries.isEmpty)
-        XCTAssertEqual(store.message, "已跳过超过 8 MB 的图片。")
+        XCTAssertEqual(store.message, "已跳过超过 30 MB 的图片。")
     }
 
     func testImageOrderingDeduplicationAndIndependenceFromText() async throws {
@@ -198,8 +198,46 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertFalse(service.containsText)
         board.clearContents()
         board.setData(TestPNG.pixel, forType: .png)
-        board.setString("file:///example", forType: .fileURL)
+        board.setString("file:///tmp/Screenshot.png", forType: .fileURL)
+        XCTAssertTrue(service.containsImage)
+        XCTAssertFalse(service.containsText)
+        XCTAssertEqual(service.readPNG(), TestPNG.pixel)
+        board.clearContents()
+        board.setData(try XCTUnwrap(NSImage(data: TestPNG.pixel)?.tiffRepresentation), forType: .tiff)
+        board.setString("file:///Users/me/Desktop/Screenshot.png", forType: .fileURL)
+        XCTAssertTrue(service.containsImage)
+        XCTAssertFalse(service.containsText)
+        XCTAssertNotNil(service.readPNG())
+        board.clearContents()
+        board.setString("file:///tmp/document.pdf", forType: .fileURL)
         XCTAssertFalse(service.containsImage)
+        XCTAssertFalse(service.containsText)
+    }
+
+    func testScreenshotBitmapWithFileURLIsRecorded() throws {
+        let board = NSPasteboard.withUniqueName()
+        defer { board.releaseGlobally() }
+        let suite = "ClipboardHistoryTests.\(UUID().uuidString)"
+        suites.append(suite)
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        temporaryDirectories.append(directory)
+        let store = ClipboardStore(
+            pasteboard: PasteboardService(pasteboard: board),
+            defaults: defaults,
+            repository: HistoryRepository(fileURL: directory.appending(path: "history.json"))
+        )
+        board.clearContents()
+        board.setData(try XCTUnwrap(NSImage(data: TestPNG.pixel)?.tiffRepresentation), forType: .tiff)
+        board.setString("file:///Users/me/Desktop/Screenshot.png", forType: .fileURL)
+        store.poll()
+        XCTAssertEqual(store.imageEntries.count, 1)
+        XCTAssertFalse(try XCTUnwrap(store.imageEntries.first?.imagePNG).isEmpty)
+        XCTAssertTrue(store.entries.isEmpty)
+        board.clearContents()
+        board.setString("file:///tmp/document.pdf", forType: .fileURL)
+        store.poll()
+        XCTAssertEqual(store.imageEntries.count, 1)
     }
 
     func testMonitorStopsAndCanRestart() async throws {

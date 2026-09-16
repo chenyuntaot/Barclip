@@ -32,12 +32,12 @@ final class PasteboardService: PasteboardAccess {
 
     var containsText: Bool {
         let types = pasteboard.types ?? []
-        return types.contains(.string) && isAllowed(types)
+        return types.contains(.string) && isUnmarked(types) && !types.contains(.fileURL)
     }
 
     var containsImage: Bool {
         let types = pasteboard.types ?? []
-        return Self.imageTypes.contains(where: types.contains) && isAllowed(types)
+        return Self.imageTypes.contains(where: types.contains) && isUnmarked(types)
     }
 
     func readText() -> String? { pasteboard.string(forType: .string) }
@@ -62,10 +62,9 @@ final class PasteboardService: PasteboardAccess {
         return pasteboard.setData(data, forType: .png)
     }
 
-    private func isAllowed(_ types: [NSPasteboard.PasteboardType]) -> Bool {
+    private func isUnmarked(_ types: [NSPasteboard.PasteboardType]) -> Bool {
         let excluded = ["org.nspasteboard.ConcealedType", "org.nspasteboard.TransientType"]
-        return !types.contains(.fileURL)
-            && !excluded.contains { types.contains(NSPasteboard.PasteboardType($0)) }
+        return !excluded.contains { types.contains(NSPasteboard.PasteboardType($0)) }
     }
 
     private static let imageTypes: [NSPasteboard.PasteboardType] = [.png, .tiff, jpegType]
