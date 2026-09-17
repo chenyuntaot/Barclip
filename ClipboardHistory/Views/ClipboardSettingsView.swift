@@ -74,10 +74,10 @@ struct ClipboardSettingsView: View {
                 }
             }
             .formStyle(.grouped)
-            .frame(minHeight: 300)
+            .frame(minHeight: 300, maxHeight: .infinity)
             aboutFooter
         }
-        .frame(minHeight: 360)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private var aboutFooter: some View {

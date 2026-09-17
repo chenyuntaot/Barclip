@@ -1,6 +1,13 @@
 import AppKit
 import SwiftUI
 
+private enum MenuPanelMetrics {
+    static let railWidth: CGFloat = 64
+    static let contentWidth: CGFloat = 360
+    static let innerWidth: CGFloat = railWidth + contentWidth
+    static let innerHeight: CGFloat = 420
+}
+
 struct ClipboardMenuView: View {
     @Environment(ClipboardStore.self) private var store
     @Environment(FileStagingStore.self) private var files
@@ -30,53 +37,42 @@ struct ClipboardMenuView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             if !isAccessoryPanel {
-                kindRail
-                    .frame(width: 64)
+                railButtons
+                    .frame(width: MenuPanelMetrics.railWidth)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transition(.opacity)
                 Divider()
                     .transition(.opacity)
             }
             Group {
                 if showsAbout {
-                    aboutColumn
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .offset(x: 18)),
-                            removal: .opacity.combined(with: .offset(x: 18))
-                        ))
+                    aboutColumn.transition(.opacity)
                 } else if showsSettings {
-                    settingsColumn
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .offset(x: 18)),
-                            removal: .opacity.combined(with: .offset(x: 18))
-                        ))
+                    settingsColumn.transition(.opacity)
                 } else if selectedSection == .files {
                     FileStagingView()
                         .padding(.leading, 12)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .offset(x: -10)),
-                            removal: .opacity.combined(with: .offset(x: -10))
-                        ))
+                        .transition(.opacity)
                 } else {
                     mainColumn
                         .padding(.leading, 12)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .offset(x: -10)),
-                            removal: .opacity.combined(with: .offset(x: -10))
-                        ))
+                        .transition(.opacity)
                 }
             }
-            .frame(width: isAccessoryPanel ? 436 : 360)
-            .frame(maxHeight: .infinity, alignment: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .frame(
+            width: MenuPanelMetrics.innerWidth,
+            height: MenuPanelMetrics.innerHeight,
+            alignment: .top
+        )
         .padding(16)
+        .clipped()
+        .contentShape(Rectangle())
         .onAppear { MenuBarDropAnchor.rememberOpenExtra() }
-        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsSettings)
-        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsAbout)
-        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: selectedSection)
+        .animation(.easeInOut(duration: 0.18), value: showsSettings)
+        .animation(.easeInOut(duration: 0.18), value: showsAbout)
+        .animation(.easeInOut(duration: 0.18), value: selectedSection)
     }
 
     private var currentKind: ClipboardKind {
@@ -85,15 +81,6 @@ struct ClipboardMenuView: View {
 
     private var currentEntries: [ClipboardEntry] {
         store.entries(for: currentKind)
-    }
-
-    @ViewBuilder
-    private var kindRail: some View {
-        if #available(macOS 26.0, *) {
-            GlassEffectContainer(spacing: 8) { railButtons }
-        } else {
-            railButtons
-        }
     }
 
     private var railButtons: some View {
@@ -108,7 +95,6 @@ struct ClipboardMenuView: View {
                     closeAccessoryPanels()
                     if section == .files { files.refresh() }
                 }
-                .help(LocalizedStringKey(section.titleKey))
                 .accessibilityLabel(LocalizedStringKey(section.titleKey))
                 .accessibilityAddTraits(selectedSection == section ? .isSelected : [])
             }
@@ -139,12 +125,10 @@ struct ClipboardMenuView: View {
                 showsAbout = false
                 showsSettings = true
             }
-            .help("设置")
             .accessibilityLabel("设置")
             railButton(title: "退出", systemImage: "power") {
                 NSApp.terminate(nil)
             }
-            .help("退出")
             .accessibilityLabel("退出")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -210,8 +194,9 @@ struct ClipboardMenuView: View {
                 Spacer(minLength: 0)
             }
             content()
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private func closeAccessoryPanels() {
@@ -259,6 +244,7 @@ struct ClipboardMenuView: View {
                 historyList
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private var emptyState: some View {
@@ -269,7 +255,8 @@ struct ClipboardMenuView: View {
             Text(currentKind == .text ? "复制一段文本后，它会出现在这里。" : "复制一张图片后，它会出现在这里。")
                 .font(.caption).foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, minHeight: 160)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(minHeight: 160)
     }
 
     private var historyList: some View {
@@ -289,8 +276,7 @@ struct ClipboardMenuView: View {
                 }
             }
         }
-        // MenuBarExtra probes the minimum size; a maximum alone lets the list collapse.
-        .frame(minHeight: 180, idealHeight: 280, maxHeight: 320)
+        .frame(minHeight: 180, maxHeight: .infinity)
     }
 
     @ViewBuilder

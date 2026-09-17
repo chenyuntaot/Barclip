@@ -176,6 +176,42 @@ final class ViewRenderingTests: XCTestCase {
         try render(menu(store, files, showsFiles: true), name: "files-missing", appearance: .light)
     }
 
+    func testMenuKeepsStableSizeWhenOpeningSettings() throws {
+        let suite = "ClipboardHistory.StableMenu.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        let store = ClipboardStore(
+            pasteboard: RenderPasteboard(),
+            defaults: defaults,
+            repository: HistoryRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "history.json"))
+        )
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "file-staging.json"))
+        )
+        let locale = Locale(identifier: "zh_Hans")
+        let historySize = NSHostingController(rootView: menu(store, files)
+            .environment(\.locale, locale)).sizeThatFits(in: CGSize(width: 2000, height: 2000))
+        let filesSize = NSHostingController(rootView: menu(store, files, showsFiles: true)
+            .environment(\.locale, locale)).sizeThatFits(in: CGSize(width: 2000, height: 2000))
+        let settingsSize = NSHostingController(rootView: menu(store, files, isShowingSettings: true)
+            .environment(\.locale, locale)).sizeThatFits(in: CGSize(width: 2000, height: 2000))
+        let aboutSize = NSHostingController(rootView: menu(store, files, isShowingAbout: true)
+            .environment(\.locale, locale)).sizeThatFits(in: CGSize(width: 2000, height: 2000))
+        XCTAssertEqual(historySize.width, settingsSize.width, accuracy: 0.5,
+            "进出设置不能改变菜单栏窗口宽度，否则液态玻璃会在边缘留下残影；历史 \(historySize.width) 设置 \(settingsSize.width)")
+        XCTAssertEqual(historySize.height, settingsSize.height, accuracy: 0.5,
+            "进出设置不能改变菜单栏窗口高度，否则液态玻璃会在边缘留下残影；历史 \(historySize.height) 设置 \(settingsSize.height)")
+        XCTAssertEqual(historySize.width, filesSize.width, accuracy: 0.5)
+        XCTAssertEqual(historySize.height, filesSize.height, accuracy: 0.5)
+        XCTAssertEqual(historySize.width, aboutSize.width, accuracy: 0.5)
+        XCTAssertEqual(historySize.height, aboutSize.height, accuracy: 0.5)
+        XCTAssertGreaterThanOrEqual(historySize.width, 420)
+        XCTAssertGreaterThanOrEqual(historySize.height, 420)
+    }
+
     private func menu(
         _ store: ClipboardStore,
         _ files: FileStagingStore,

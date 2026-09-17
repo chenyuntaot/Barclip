@@ -32,6 +32,7 @@ struct FileStagingView: View {
             Text("暂存区只记录文件引用。")
                 .font(.caption).foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
             receive(providers)
         }
@@ -68,7 +69,8 @@ struct FileStagingView: View {
                 .font(.caption).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, minHeight: 160)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(minHeight: 160)
         .padding(8)
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -94,7 +96,7 @@ struct FileStagingView: View {
             }
             .padding(.vertical, 2)
         }
-        .frame(minHeight: 180, idealHeight: 280, maxHeight: 320)
+        .frame(minHeight: 180, maxHeight: .infinity)
         .focusable()
         .focused($gridFocused)
         .focusEffectDisabled()

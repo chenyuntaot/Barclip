@@ -35,7 +35,7 @@ struct ClipboardAboutView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(minHeight: 320)
+        .frame(minHeight: 320, maxHeight: .infinity)
     }
 
     private func aboutRow(title: String, value: String) -> some View {
