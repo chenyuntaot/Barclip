@@ -1,6 +1,50 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
+    "地址已复制" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path copied"
+          }
+        }
+      }
+    },
+    "复制地址" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Path"
+          }
+        }
+      }
+    },
+    "显示说明" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show information"
+          }
+        }
+      }
+    },
+    "说明" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Information"
+          }
+        }
+      }
+    },
     "%@ / %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -149,13 +193,13 @@
         }
       }
     },
-    "可选中并复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。" : {
+    "点击复制按钮复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Select and copy this path, then open it with Go to Folder in Finder to clean it manually."
+            "value" : "Click the copy button, then open this path with Go to Folder in Finder to clean it manually."
           }
         }
       }

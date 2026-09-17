@@ -27,6 +27,20 @@ final class ClipboardStoreTests: XCTestCase {
         return (ClipboardStore(pasteboard: board, defaults: defaults, repository: repository), board, defaults)
     }
 
+    func testCopyCacheDirectoryCanRetryWithoutAddingHistory() throws {
+        let (store, board, _) = try fixture()
+        board.writeSucceeds = false
+        XCTAssertFalse(store.copyCacheDirectoryPath())
+        XCTAssertTrue(store.entries.isEmpty)
+        board.writeSucceeds = true
+        for _ in 0..<2 {
+            XCTAssertTrue(store.copyCacheDirectoryPath())
+            XCTAssertEqual(board.text, HistoryRepository.cacheDirectoryURL().path(percentEncoded: false))
+            store.poll()
+            XCTAssertTrue(store.entries.isEmpty)
+        }
+    }
+
     func testTextOrderingDeduplicationAndOriginalWhitespace() async throws {
         let (store, board, _) = try fixture()
         board.publish("  第一行\n第二行  "); store.poll()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ClipboardSettingsView: View {
     @Environment(ClipboardStore.self) private var store
+    @State private var didCopyCachePath: Bool?
     var onOpenAbout: () -> Void = {}
 
     private var cacheDirectoryPath: String {
@@ -11,7 +12,7 @@ struct ClipboardSettingsView: View {
     var body: some View {
         VStack(spacing: 0) {
             Form {
-                Section("历史容量") {
+                Section {
                     Picker("保留条数", selection: Binding(
                         get: { store.capacity }, set: { store.setCapacity($0) }
                     )) {
@@ -20,10 +21,10 @@ struct ClipboardSettingsView: View {
                         }
                     }
                     .disabled(store.isLoading || store.storageError == .load)
-                    Text("文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。")
-                        .font(.caption).foregroundStyle(.secondary)
+                } header: {
+                    SettingsSectionHeader(title: "历史容量", explanation: "文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。")
                 }
-                Section("保存策略") {
+                Section {
                     Picker("历史记录", selection: Binding(
                         get: { store.retention }, set: { store.setRetention($0) }
                     )) {
@@ -32,24 +33,35 @@ struct ClipboardSettingsView: View {
                         }
                     }
                     .disabled(store.isLoading || store.storageError == .load)
-                    Text("选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
-                        .font(.caption).foregroundStyle(.secondary)
+                } header: {
+                    SettingsSectionHeader(title: "保存策略", explanation: "选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
                 }
-                Section("磁盘缓存") {
+                Section {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("文件夹地址")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Text(cacheDirectoryPath)
-                            .font(.system(.caption, design: .monospaced))
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(alignment: .top, spacing: 8) {
+                            Text(cacheDirectoryPath)
+                                .font(.system(.caption, design: .monospaced))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityLabel("缓存文件夹地址 \(cacheDirectoryPath)")
+                            Button {
+                                didCopyCachePath = store.copyCacheDirectoryPath()
+                            } label: {
+                                Label("复制地址", systemImage: "doc.on.doc")
+                                    .labelStyle(.iconOnly)
+                            }
+                            .help("复制地址")
+                        }
+                        if let didCopyCachePath {
+                            Text(didCopyCachePath ? "地址已复制" : "复制失败，请重试。")
+                                .font(.caption)
+                                .foregroundStyle(didCopyCachePath ? Color.secondary : Color.red)
+                        }
                     }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("缓存文件夹地址 \(cacheDirectoryPath)")
-                    Text("可选中并复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                } header: {
+                    SettingsSectionHeader(title: "磁盘缓存", explanation: "点击复制按钮复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。")
                 }
             }
             .formStyle(.grouped)
@@ -77,6 +89,39 @@ struct ClipboardSettingsView: View {
         .help("程序版本和关于我们")
         .accessibilityLabel("程序版本 \(AppInfo.shortVersion)，关于我们，\(AppInfo.copyright)")
         .accessibilityHint("打开程序版本和关于我们")
+    }
+}
+
+private struct SettingsSectionHeader: View {
+    let title: LocalizedStringKey
+    let explanation: LocalizedStringKey
+    @State private var isShowingExplanation = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Button {
+                isShowingExplanation.toggle()
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 24, height: 24)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(title) + Text("说明"))
+            .help("显示说明")
+            .popover(isPresented: $isShowingExplanation, arrowEdge: .trailing) {
+                Text(explanation)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
+                    .padding(16)
+                    .frame(width: 300, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 

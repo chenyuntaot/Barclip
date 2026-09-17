@@ -202,6 +202,16 @@ final class ClipboardStore {
         persist()
     }
 
+    func copyCacheDirectoryPath() -> Bool {
+        let succeeded = pasteboard.writeText(HistoryRepository.cacheDirectoryURL().path(percentEncoded: false))
+        // Copying a settings value must not collect it as a new history entry.
+        lastChangeCount = pasteboard.changeCount
+        if !succeeded {
+            Self.logger.error("Pasteboard cache directory write failed")
+        }
+        return succeeded
+    }
+
     func copy(_ entry: ClipboardEntry) {
         switch entry.kind {
         case .text:
