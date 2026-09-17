@@ -4,6 +4,10 @@ struct ClipboardSettingsView: View {
     @Environment(ClipboardStore.self) private var store
     var onOpenAbout: () -> Void = {}
 
+    private var cacheDirectoryPath: String {
+        HistoryRepository.cacheDirectoryURL().path(percentEncoded: false)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Form {
@@ -15,6 +19,7 @@ struct ClipboardSettingsView: View {
                             Text("\(capacity) 条").tag(capacity)
                         }
                     }
+                    .disabled(store.isLoading || store.storageError == .load)
                     Text("文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -26,8 +31,25 @@ struct ClipboardSettingsView: View {
                             Text(policy.title).tag(policy)
                         }
                     }
+                    .disabled(store.isLoading || store.storageError == .load)
                     Text("选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
                         .font(.caption).foregroundStyle(.secondary)
+                }
+                Section("磁盘缓存") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("文件夹地址")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(cacheDirectoryPath)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("缓存文件夹地址 \(cacheDirectoryPath)")
+                    Text("可选中并复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .formStyle(.grouped)

@@ -16,7 +16,7 @@
 - `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。状态提示用 `StatusMessage` 枚举，界面按 `allowsRetry` 决定是否显示重试，不再用中文字符串前缀判断。
 - `Localizable.xcstrings`：简体中文为源语言，另含英文。界面随系统语言切换，应用内不提供语言选项。
 - `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示、设置与关于入口。
-- `Views/ClipboardSettingsView.swift`：容量、保存策略，以及底部程序版本 / 关于我们 / 版权入口。
+- `Views/ClipboardSettingsView.swift`：容量、保存策略、可复制的实际缓存目录，以及底部程序版本 / 关于我们 / 版权入口。缓存目录直接读取 `HistoryRepository` 的路径定义，避免展示地址与实际存储位置不一致。
 - `Views/ClipboardAboutView.swift`：程序版本和关于我们页面，展示编译后的应用图标。
 
 ## 监听方式

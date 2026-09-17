@@ -142,7 +142,6 @@ struct ClipboardMenuView: View {
             closeAccessoryPanels()
         } content: {
             ClipboardSettingsView(onOpenAbout: { showsAbout = true })
-                .disabled(store.isLoading || store.storageError == .load)
         }
     }
 

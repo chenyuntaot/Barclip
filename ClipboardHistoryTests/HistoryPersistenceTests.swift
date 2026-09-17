@@ -132,6 +132,14 @@ final class HistoryPersistenceTests: XCTestCase {
     func testHistoryURLUsesBarclipApplicationSupport() {
         let support = directory.appending(path: "Application Support")
         XCTAssertEqual(
+            HistoryRepository.cacheDirectoryURL(inApplicationSupport: support),
+            support.appending(path: "Barclip", directoryHint: .isDirectory)
+        )
+        XCTAssertEqual(
+            HistoryRepository.cacheDirectoryURL(),
+            URL.applicationSupportDirectory.appending(path: "Barclip", directoryHint: .isDirectory)
+        )
+        XCTAssertEqual(
             HistoryRepository.historyURL(inApplicationSupport: support),
             support.appending(path: "Barclip/history.json")
         )

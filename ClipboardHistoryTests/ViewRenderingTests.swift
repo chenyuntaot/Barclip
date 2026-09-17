@@ -78,6 +78,8 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertEqual(String(localized: "图片", bundle: english), "Images")
         XCTAssertEqual(String(localized: "清空历史", bundle: english), "Clear History")
         XCTAssertEqual(String(localized: "退出后清空", bundle: english), "Clear on Quit")
+        XCTAssertEqual(String(localized: "磁盘缓存", bundle: english), "Disk Cache")
+        XCTAssertEqual(String(localized: "文件夹地址", bundle: english), "Folder Path")
         XCTAssertEqual(String(localized: "关于我们", bundle: english), "About")
         XCTAssertEqual(String(localized: "已复制，可使用 ⌘V 粘贴。", bundle: english), "Copied. Paste with ⌘V.")
         XCTAssertEqual(ClipboardStore.StatusMessage.copied.allowsRetry, false)

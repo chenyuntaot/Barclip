@@ -61,6 +61,17 @@
         }
       }
     },
+    "缓存文件夹地址 %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cache folder path %@"
+          }
+        }
+      }
+    },
     "保留条数" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -134,6 +145,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "History"
+          }
+        }
+      }
+    },
+    "可选中并复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select and copy this path, then open it with Go to Folder in Finder to clean it manually."
           }
         }
       }
@@ -336,6 +358,17 @@
         }
       }
     },
+    "文件夹地址" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder Path"
+          }
+        }
+      }
+    },
     "正在读取历史…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -365,6 +398,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clears this category in Barclip. The system clipboard is left unchanged."
+          }
+        }
+      }
+    },
+    "磁盘缓存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disk Cache"
           }
         }
       }

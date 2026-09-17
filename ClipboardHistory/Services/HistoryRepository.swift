@@ -5,9 +5,12 @@ actor HistoryRepository {
     private let legacyDirectories: [URL]
     private var latestRevision = -1
 
-    static func historyURL(inApplicationSupport directory: URL = .applicationSupportDirectory) -> URL {
+    static func cacheDirectoryURL(inApplicationSupport directory: URL = .applicationSupportDirectory) -> URL {
         directory.appending(path: "Barclip", directoryHint: .isDirectory)
-            .appending(path: "history.json")
+    }
+
+    static func historyURL(inApplicationSupport directory: URL = .applicationSupportDirectory) -> URL {
+        cacheDirectoryURL(inApplicationSupport: directory).appending(path: "history.json")
     }
 
     init() {
