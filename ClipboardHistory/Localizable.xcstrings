@@ -215,6 +215,39 @@
         }
       }
     },
+    "文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Files"
+          }
+        }
+      }
+    },
+    "文件已丢失" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File Missing"
+          }
+        }
+      }
+    },
+    "文件夹" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder"
+          }
+        }
+      }
+    },
     "在默认应用中打开" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -222,6 +255,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open in the default app"
+          }
+        }
+      }
+    },
+    "预览" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
           }
         }
       }
@@ -325,13 +369,13 @@
         }
       }
     },
-    "文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。" : {
+    "文本、图片和文件各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Text and images each keep this many items. Older items are removed when the limit is exceeded. Lowering the limit takes effect immediately."
+            "value" : "Text, images, and files each keep this many items. Older items are removed when the limit is exceeded. Lowering the limit takes effect immediately."
           }
         }
       }
@@ -589,13 +633,178 @@
         }
       }
     },
-    "选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。" : {
+    "选择重启后保留时，文本、图片和文件位置保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "When keeping history after restart, text and images are saved in Application Support/Barclip in your user Library. Deleting the app does not delete this history. Switching to clear on quit deletes the current disk cache while keeping current entries available. Migrated legacy caches remain in their original locations."
+            "value" : "When keeping history after restart, text, images, and file locations are saved in Application Support/Barclip in your user Library. Deleting the app does not delete this history. Switching to clear on quit deletes the current disk cache while keeping current entries available. Migrated legacy caches remain in their original locations."
+          }
+        }
+      }
+    },
+    "暂无暂存文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Staged Files"
+          }
+        }
+      }
+    },
+    "从访达或桌面把文件拖到这里。原位置会保留一份。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag files here from Finder or the Desktop. The original stays in place."
+          }
+        }
+      }
+    },
+    "拖到此处暂存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop to Stage"
+          }
+        }
+      }
+    },
+    "原位置会保留文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The original file is kept"
+          }
+        }
+      }
+    },
+    "清空暂存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Staging"
+          }
+        }
+      }
+    },
+    "清空暂存的文件引用，不会删除原文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removes staged file references. Original files are not deleted."
+          }
+        }
+      }
+    },
+    "从暂存移除" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from Staging"
+          }
+        }
+      }
+    },
+    "单击选中，空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to select, press space to preview, double-click to open. Dragging out copies the file and leaves the original."
+          }
+        }
+      }
+    },
+    "按空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press space to preview, double-click to open. Dragging out copies the file and leaves the original."
+          }
+        }
+      }
+    },
+    "无法读取文件暂存，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read staged files. Please retry."
+          }
+        }
+      }
+    },
+    "无法更新文件暂存。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't update staged files."
+          }
+        }
+      }
+    },
+    "无法打开该文件，它可能已被移动或删除。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't open this file. It may have been moved or deleted."
+          }
+        }
+      }
+    },
+    "无法预览该文件，它可能已被移动或删除。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't preview this file. It may have been moved or deleted."
+          }
+        }
+      }
+    },
+    "暂存只记下文件位置，拖出时再复制" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staging stores file locations and copies on the way out"
+          }
+        }
+      }
+    },
+    "暂存区只记录文件引用。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staging only stores file references."
           }
         }
       }

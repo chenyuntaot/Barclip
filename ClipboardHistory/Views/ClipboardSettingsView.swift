@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ClipboardSettingsView: View {
     @Environment(ClipboardStore.self) private var store
+    @Environment(FileStagingStore.self) private var files
     @State private var didCopyCachePath: Bool?
     var onOpenAbout: () -> Void = {}
 
@@ -14,7 +15,11 @@ struct ClipboardSettingsView: View {
             Form {
                 Section {
                     Picker("保留条数", selection: Binding(
-                        get: { store.capacity }, set: { store.setCapacity($0) }
+                        get: { store.capacity },
+                        set: { value in
+                            store.setCapacity(value)
+                            files.setCapacity(value)
+                        }
                     )) {
                         ForEach(ClipboardStore.capacityOptions, id: \.self) { capacity in
                             Text("\(capacity) 条").tag(capacity)
@@ -22,11 +27,15 @@ struct ClipboardSettingsView: View {
                     }
                     .disabled(store.isLoading || store.storageError == .load)
                 } header: {
-                    SettingsSectionHeader(title: "历史容量", explanation: "文本和图片各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。")
+                    SettingsSectionHeader(title: "历史容量", explanation: "文本、图片和文件各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。")
                 }
                 Section {
                     Picker("历史记录", selection: Binding(
-                        get: { store.retention }, set: { store.setRetention($0) }
+                        get: { store.retention },
+                        set: { value in
+                            store.setRetention(value)
+                            files.setRetention(value)
+                        }
                     )) {
                         ForEach(RetentionPolicy.allCases) { policy in
                             Text(policy.title).tag(policy)
@@ -34,7 +43,7 @@ struct ClipboardSettingsView: View {
                     }
                     .disabled(store.isLoading || store.storageError == .load)
                 } header: {
-                    SettingsSectionHeader(title: "保存策略", explanation: "选择重启后保留时，文本和图片保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
+                    SettingsSectionHeader(title: "保存策略", explanation: "选择重启后保留时，文本、图片和文件位置保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
                 }
                 Section {
                     VStack(alignment: .leading, spacing: 4) {

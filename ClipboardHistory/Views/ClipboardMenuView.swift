@@ -3,12 +3,22 @@ import SwiftUI
 
 struct ClipboardMenuView: View {
     @Environment(ClipboardStore.self) private var store
+    @Environment(FileStagingStore.self) private var files
     @State private var showsSettings = false
     @State private var showsAbout = false
-    @State private var selectedKind: ClipboardKind
+    @State private var selectedSection: SidebarSection
 
-    init(initialKind: ClipboardKind = .text, isShowingSettings: Bool = false, isShowingAbout: Bool = false) {
-        _selectedKind = State(initialValue: initialKind)
+    init(
+        initialKind: ClipboardKind = .text,
+        isShowingSettings: Bool = false,
+        isShowingAbout: Bool = false,
+        showsFiles: Bool = false
+    ) {
+        if showsFiles {
+            _selectedSection = State(initialValue: .files)
+        } else {
+            _selectedSection = State(initialValue: initialKind == .image ? .image : .text)
+        }
         _showsSettings = State(initialValue: isShowingSettings || isShowingAbout)
         _showsAbout = State(initialValue: isShowingAbout)
     }
@@ -43,6 +53,13 @@ struct ClipboardMenuView: View {
                             insertion: .opacity.combined(with: .offset(x: 18)),
                             removal: .opacity.combined(with: .offset(x: 18))
                         ))
+                } else if selectedSection == .files {
+                    FileStagingView()
+                        .padding(.leading, 12)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .offset(x: -10)),
+                            removal: .opacity.combined(with: .offset(x: -10))
+                        ))
                 } else {
                     mainColumn
                         .padding(.leading, 12)
@@ -56,12 +73,18 @@ struct ClipboardMenuView: View {
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .padding(16)
+        .onAppear { MenuBarDropAnchor.rememberOpenExtra() }
         .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsSettings)
         .animation(.spring(response: 0.42, dampingFraction: 0.86), value: showsAbout)
+        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: selectedSection)
+    }
+
+    private var currentKind: ClipboardKind {
+        selectedSection.clipboardKind ?? .text
     }
 
     private var currentEntries: [ClipboardEntry] {
-        store.entries(for: selectedKind)
+        store.entries(for: currentKind)
     }
 
     @ViewBuilder
@@ -75,47 +98,60 @@ struct ClipboardMenuView: View {
 
     private var railButtons: some View {
         VStack(spacing: 8) {
-            ForEach(ClipboardKind.allCases) { kind in
-                railButton(title: kind.title, systemImage: kind.systemImage, isSelected: selectedKind == kind) {
-                    selectedKind = kind
+            ForEach(SidebarSection.allCases) { section in
+                railButton(
+                    title: LocalizedStringKey(section.titleKey),
+                    systemImage: section.systemImage,
+                    isSelected: selectedSection == section
+                ) {
+                    selectedSection = section
                     closeAccessoryPanels()
+                    if section == .files { files.refresh() }
                 }
-                .help(kind.title)
-                .accessibilityLabel(kind.title)
-                .accessibilityAddTraits(selectedKind == kind ? .isSelected : [])
+                .help(LocalizedStringKey(section.titleKey))
+                .accessibilityLabel(LocalizedStringKey(section.titleKey))
+                .accessibilityAddTraits(selectedSection == section ? .isSelected : [])
             }
             Spacer(minLength: 12)
             Divider()
             railButton(
-                title: String(localized: "清空历史"),
+                title: selectedSection == .files ? "清空暂存" : "清空历史",
                 systemImage: "trash",
-                disabled: store.isLoading
+                disabled: selectedSection == .files ? files.isLoading : store.isLoading
             ) {
-                store.clear(selectedKind)
+                if selectedSection == .files {
+                    files.clear()
+                } else {
+                    store.clear(currentKind)
+                }
             }
-            .help(String(localized: "清空当前分类的应用内历史，系统剪贴板内容保持不变"))
-            .accessibilityLabel(String(localized: "清空历史"))
+            .help(
+                selectedSection == .files
+                    ? "清空暂存的文件引用，不会删除原文件"
+                    : "清空当前分类的应用内历史，系统剪贴板内容保持不变"
+            )
+            .accessibilityLabel(selectedSection == .files ? "清空暂存" : "清空历史")
             railButton(
-                title: String(localized: "设置"),
+                title: "设置",
                 systemImage: "gearshape",
                 disabled: store.isLoading
             ) {
                 showsAbout = false
                 showsSettings = true
             }
-            .help(String(localized: "设置"))
-            .accessibilityLabel(String(localized: "设置"))
-            railButton(title: String(localized: "退出"), systemImage: "power") {
+            .help("设置")
+            .accessibilityLabel("设置")
+            railButton(title: "退出", systemImage: "power") {
                 NSApp.terminate(nil)
             }
-            .help(String(localized: "退出"))
-            .accessibilityLabel(String(localized: "退出"))
+            .help("退出")
+            .accessibilityLabel("退出")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private func railButton(
-        title: String,
+        title: LocalizedStringKey,
         systemImage: String,
         isSelected: Bool = false,
         disabled: Bool = false,
@@ -222,17 +258,15 @@ struct ClipboardMenuView: View {
             } else {
                 historyList
             }
-            Text(store.retention == .session ? "历史仅本次运行保留" : "历史写在应用内，重启后保留")
-                .font(.caption).foregroundStyle(.secondary)
         }
     }
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: selectedKind == .text ? "doc.on.clipboard" : "photo")
+            Image(systemName: currentKind == .text ? "doc.on.clipboard" : "photo")
                 .font(.largeTitle).foregroundStyle(.secondary)
             Text("暂无历史记录").font(.headline)
-            Text(selectedKind == .text ? "复制一段文本后，它会出现在这里。" : "复制一张图片后，它会出现在这里。")
+            Text(currentKind == .text ? "复制一段文本后，它会出现在这里。" : "复制一张图片后，它会出现在这里。")
                 .font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, minHeight: 160)
@@ -356,11 +390,12 @@ private struct SettingsBackButtonBody: View {
     }
 }
 
-private struct RailGlassEffect: ViewModifier {
+struct RailGlassEffect: ViewModifier {
     var isActive: Bool
+    var cornerRadius: CGFloat = 8
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 8, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         return glassBody(content: content, shape: shape)
     }
 

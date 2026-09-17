@@ -7,7 +7,9 @@ struct ClipboardHistoryApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            ClipboardMenuView().environment(delegate.store)
+            ClipboardMenuView()
+                .environment(delegate.store)
+                .environment(delegate.fileStore)
         } label: {
             MenuBarExtraLabel()
         }
@@ -36,6 +38,8 @@ struct ClipboardGlyph: View {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store: ClipboardStore
+    let fileStore: FileStagingStore
+    private var dropShelf: DropShelfController?
     private var testPasteboard: NSPasteboard?
     private var testDirectory: URL?
     private var testSuite: String?
@@ -55,6 +59,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     defaults: defaults,
                     repository: HistoryRepository(fileURL: directory.appending(path: "history.json"))
                 )
+                fileStore = FileStagingStore(
+                    defaults: defaults,
+                    repository: FileStagingRepository(fileURL: directory.appending(path: "file-staging.json"))
+                )
                 super.init()
                 board.setString("这是一条用于界面验证的模拟文本。\n支持中文、多行和 Emoji 📝", forType: .string)
                 return
@@ -62,7 +70,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
         store = ClipboardStore()
+        fileStore = FileStagingStore()
         super.init()
+        dropShelf = DropShelfController(store: fileStore)
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -70,14 +80,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Unit tests use isolated pasteboards and must not capture the user's clipboard.
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
             store.start()
+            fileStore.start()
+            dropShelf?.start()
         }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         store.stop()
+        fileStore.endExport()
+        dropShelf?.stop()
         Task {
             await store.finishPendingSave()
-            if store.storageError == .save {
+            await fileStore.finishPendingSave()
+            if store.storageError == .save || fileStore.storageError == .save {
                 let alert = NSAlert()
                 alert.messageText = String(localized: "本机缓存尚未成功更新")
                 alert.informativeText = String(localized: "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。")
@@ -85,6 +100,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 alert.addButton(withTitle: String(localized: "仍然退出"))
                 if alert.runModal() == .alertFirstButtonReturn {
                     store.start()
+                    fileStore.start()
+                    dropShelf?.start()
                     sender.reply(toApplicationShouldTerminate: false)
                     return
                 }
@@ -96,6 +113,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         store.stop()
+        dropShelf?.stop()
         testPasteboard?.releaseGlobally()
         if let testSuite { UserDefaults.standard.removePersistentDomain(forName: testSuite) }
         if let testDirectory, FileManager.default.fileExists(atPath: testDirectory.path) {

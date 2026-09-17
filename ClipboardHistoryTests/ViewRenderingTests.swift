@@ -13,27 +13,34 @@ final class ViewRenderingTests: XCTestCase {
         let repository = HistoryRepository(fileURL: FileManager.default.temporaryDirectory
             .appending(path: suite).appending(path: "history.json"))
         let store = ClipboardStore(pasteboard: board, defaults: defaults, repository: repository)
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "file-staging.json"))
+        )
         XCTAssertEqual(NSApplication.shared.activationPolicy(), .accessory)
-        try render(ClipboardMenuView().environment(store), name: "empty", appearance: .light)
-        try render(ClipboardMenuView(initialKind: .image).environment(store), name: "empty-image", appearance: .light)
+        try render(menu(store, files), name: "empty", appearance: .light)
+        try render(menu(store, files, initialKind: .image), name: "empty-image", appearance: .light)
+        try render(menu(store, files, showsFiles: true), name: "empty-files", appearance: .light)
+        try render(menu(store, files, showsFiles: true), name: "empty-files", appearance: .dark)
         board.text = "支持中文、多行与 Emoji 📝\n第二行保留原始格式。"
         board.changeCount += 1
         store.poll()
         await store.finishPendingSave()
-        try render(ClipboardMenuView().environment(store), name: "history", appearance: .light)
-        try render(ClipboardMenuView().environment(store), name: "history", appearance: .dark)
+        try render(menu(store, files), name: "history", appearance: .light)
+        try render(menu(store, files), name: "history", appearance: .dark)
         board.png = TestPNG.pixel
         board.containsImage = true
         board.containsText = false
         board.changeCount += 1
         store.poll()
         await store.finishPendingSave()
-        try render(ClipboardMenuView(initialKind: .image).environment(store), name: "images", appearance: .light)
-        try render(ClipboardMenuView(isShowingSettings: true).environment(store), name: "settings-page", appearance: .light)
-        try render(ClipboardMenuView(isShowingAbout: true).environment(store), name: "about-page", appearance: .light)
-        try render(ClipboardSettingsView().environment(store).padding(16).frame(width: 360),
+        try render(menu(store, files, initialKind: .image), name: "images", appearance: .light)
+        try render(menu(store, files, isShowingSettings: true), name: "settings-page", appearance: .light)
+        try render(menu(store, files, isShowingAbout: true), name: "about-page", appearance: .light)
+        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
                    name: "settings", appearance: .light)
-        try render(ClipboardSettingsView().environment(store).padding(16).frame(width: 360),
+        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
                    name: "settings", appearance: .dark)
         try render(ClipboardAboutView().padding(16).frame(width: 360),
                    name: "about", appearance: .light)
@@ -41,12 +48,20 @@ final class ViewRenderingTests: XCTestCase {
                    name: "about", appearance: .dark)
         try render(MenuBarExtraLabel().padding(8), name: "menu-bar-icon", appearance: .light)
         try render(MenuBarExtraLabel().padding(8), name: "menu-bar-icon", appearance: .dark)
-        try render(ClipboardMenuView().environment(store), name: "empty-en", appearance: .light,
+        try render(menu(store, files), name: "empty-en", appearance: .light,
                    locale: Locale(identifier: "en"))
-        try render(ClipboardSettingsView().environment(store).padding(16).frame(width: 360),
+        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
                    name: "settings-en", appearance: .light, locale: Locale(identifier: "en"))
         try render(ClipboardAboutView().padding(16).frame(width: 360),
                    name: "about-en", appearance: .light, locale: Locale(identifier: "en"))
+        try render(menu(store, files, showsFiles: true), name: "empty-files-en", appearance: .light,
+                   locale: Locale(identifier: "en"))
+        try render(DropShelfView(isTargeted: .constant(false), onDrop: { _ in })
+            .frame(width: MenuBarDropAnchor.shelfSize.width, height: MenuBarDropAnchor.shelfSize.height), name: "drop-shelf", appearance: .light)
+        try render(DropShelfView(isTargeted: .constant(true), onDrop: { _ in })
+            .frame(width: MenuBarDropAnchor.shelfSize.width, height: MenuBarDropAnchor.shelfSize.height), name: "drop-shelf-targeted", appearance: .light)
+        try render(DropShelfView(isTargeted: .constant(false), onDrop: { _ in })
+            .frame(width: MenuBarDropAnchor.shelfSize.width, height: MenuBarDropAnchor.shelfSize.height), name: "drop-shelf", appearance: .dark)
     }
 
     func testAppInfoExposesAboutMetadata() {
@@ -76,7 +91,13 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertEqual(String(localized: "设置", bundle: english), "Settings")
         XCTAssertEqual(String(localized: "文本", bundle: english), "Text")
         XCTAssertEqual(String(localized: "图片", bundle: english), "Images")
+        XCTAssertEqual(String(localized: "文件", bundle: english), "Files")
         XCTAssertEqual(String(localized: "清空历史", bundle: english), "Clear History")
+        XCTAssertEqual(String(localized: "清空暂存", bundle: english), "Clear Staging")
+        XCTAssertEqual(String(localized: "暂无暂存文件", bundle: english), "No Staged Files")
+        XCTAssertEqual(String(localized: "拖到此处暂存", bundle: english), "Drop to Stage")
+        XCTAssertEqual(String(localized: "暂存区只记录文件引用。", bundle: english), "Staging only stores file references.")
+        XCTAssertEqual(String(localized: "预览", bundle: english), "Preview")
         XCTAssertEqual(String(localized: "退出后清空", bundle: english), "Clear on Quit")
         XCTAssertEqual(String(localized: "磁盘缓存", bundle: english), "Disk Cache")
         XCTAssertEqual(String(localized: "文件夹地址", bundle: english), "Folder Path")
@@ -96,8 +117,14 @@ final class ViewRenderingTests: XCTestCase {
             repository: HistoryRepository(fileURL: FileManager.default.temporaryDirectory
                 .appending(path: suite).appending(path: "history.json"))
         )
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "file-staging.json"))
+        )
         let host = NSHostingController(rootView: ClipboardSettingsView()
             .environment(store)
+            .environment(files)
             .environment(\.locale, Locale(identifier: "zh_Hans"))
             .frame(width: 360))
         let size = host.sizeThatFits(in: CGSize(width: 360, height: 0))
@@ -113,13 +140,18 @@ final class ViewRenderingTests: XCTestCase {
         let store = ClipboardStore(pasteboard: board, defaults: defaults,
             repository: HistoryRepository(fileURL: FileManager.default.temporaryDirectory
                 .appending(path: suite).appending(path: "history.json")))
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "file-staging.json"))
+        )
         for index in 1...3 {
             board.text = "可见历史记录 \(index)"
             board.changeCount += 1
             store.poll()
         }
         await store.finishPendingSave()
-        let host = NSHostingController(rootView: ClipboardMenuView().environment(store)
+        let host = NSHostingController(rootView: menu(store, files)
             .environment(\.locale, Locale(identifier: "zh_Hans")))
         let compactSize = host.sizeThatFits(in: CGSize(width: 480, height: 0))
         // A menu host probes its minimum size. Three rows must not collapse into the toolbar.
@@ -127,8 +159,39 @@ final class ViewRenderingTests: XCTestCase {
             "有 3 条历史时，面板最小高度必须容纳可见列表；实际 \(compactSize.height)")
         XCTAssertGreaterThanOrEqual(compactSize.height, 320,
             "侧栏要同时放下分类按钮和左下角操作；实际 \(compactSize.height)")
-        try render(ClipboardMenuView().environment(store).frame(height: compactSize.height),
+        try render(menu(store, files).frame(height: compactSize.height),
                    name: "compact-history", appearance: .light)
+        let file = FileManager.default.temporaryDirectory.appending(path: "\(suite)-staged.txt")
+        try Data("staged".utf8).write(to: file)
+        files.stage([file])
+        try render(menu(store, files, showsFiles: true), name: "files", appearance: .light)
+        try render(menu(store, files, showsFiles: true), name: "files", appearance: .dark)
+        let imageFile = FileManager.default.temporaryDirectory.appending(path: "\(suite)-staged.png")
+        try TestPNG.pixel.write(to: imageFile)
+        files.stage([imageFile])
+        try render(menu(store, files, showsFiles: true), name: "files-image", appearance: .light)
+        try FileManager.default.removeItem(at: file)
+        try FileManager.default.removeItem(at: imageFile)
+        files.refresh()
+        try render(menu(store, files, showsFiles: true), name: "files-missing", appearance: .light)
+    }
+
+    private func menu(
+        _ store: ClipboardStore,
+        _ files: FileStagingStore,
+        initialKind: ClipboardKind = .text,
+        isShowingSettings: Bool = false,
+        isShowingAbout: Bool = false,
+        showsFiles: Bool = false
+    ) -> some View {
+        ClipboardMenuView(
+            initialKind: initialKind,
+            isShowingSettings: isShowingSettings,
+            isShowingAbout: isShowingAbout,
+            showsFiles: showsFiles
+        )
+        .environment(store)
+        .environment(files)
     }
 
     private func render<Content: View>(
