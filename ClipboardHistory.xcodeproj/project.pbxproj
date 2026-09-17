@@ -365,7 +365,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Barclip;
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -375,7 +375,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = local.ClipboardHistory;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yuntaochen.barclip;
 				PRODUCT_MODULE_NAME = ClipboardHistory;
 				PRODUCT_NAME = Barclip;
 				SDKROOT = macosx;
@@ -401,8 +401,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C23AMRCLTG;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Barclip;
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -412,9 +416,10 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = local.ClipboardHistory;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yuntaochen.barclip;
 				PRODUCT_MODULE_NAME = ClipboardHistory;
 				PRODUCT_NAME = Barclip;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 			};
 			name = Release;
