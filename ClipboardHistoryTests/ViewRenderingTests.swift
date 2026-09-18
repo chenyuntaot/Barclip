@@ -70,7 +70,7 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertEqual(AppInfo.contactEmail, "chenyuntao0123@icloud.com")
         XCTAssertEqual(AppInfo.mailtoURL.absoluteString, "mailto:chenyuntao0123@icloud.com")
         XCTAssertEqual(AppInfo.repositoryURL.absoluteString, "https://github.com/chenyuntaot/Barclip")
-        XCTAssertEqual(AppInfo.copyright, "© 2026 陈云涛")
+        XCTAssertEqual(AppInfo.copyright, "© 2026 Yuntao Chen")
         XCTAssertFalse(AppInfo.shortVersion.isEmpty)
         XCTAssertFalse(AppInfo.buildNumber.isEmpty)
         XCTAssertEqual(AppInfo.versionLabel, "\(AppInfo.shortVersion) (\(AppInfo.buildNumber))")

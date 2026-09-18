@@ -60,7 +60,7 @@ JSON 只保存文本和图片文件名，避免把位图 base64 进同一份文�
 
 界面只做简体中文和英文，跟随 macOS 系统语言，不在设置里放语言开关。源文案是中文，放在 `ClipboardHistory/Localizable.xcstrings`；英文写在同一份目录的 `en` 本地化里。工程 `developmentRegion` 为 `zh-Hans`。
 
-SwiftUI 字面量（`Text("设置")`、`Section`、`help`、`accessibilityLabel` 等）走 `LocalizedStringKey`。Store、模型标题、退出确认框没有 SwiftUI 环境，使用 `String(localized:)`，同样查这份目录。`Barclip`、开发者姓名、邮箱、仓库地址和版权中的姓名不翻译。
+SwiftUI 字面量（`Text("设置")`、`Section`、`help`、`accessibilityLabel` 等）走 `LocalizedStringKey`。Store、模型标题、退出确认框没有 SwiftUI 环境，使用 `String(localized:)`，同样查这份目录。`Barclip`、开发者姓名「陈云涛」、邮箱、仓库地址和版权姓名 `Yuntao Chen` 不翻译。
 
 状态提示不再用 `message.hasPrefix("无法读取")` 这类易随翻译失效的判断，改为 `StatusMessage.allowsRetry`。
 

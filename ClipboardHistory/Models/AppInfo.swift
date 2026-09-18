@@ -22,7 +22,7 @@ enum AppInfo: Sendable {
     }
 
     static var copyright: String {
-        string(for: "NSHumanReadableCopyright") ?? "© 2026 陈云涛"
+        string(for: "NSHumanReadableCopyright") ?? "© 2026 Yuntao Chen"
     }
 
     static var mailtoURL: URL {

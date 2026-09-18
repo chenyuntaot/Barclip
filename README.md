@@ -100,4 +100,4 @@ Debug 构建可加上 `--isolated-ui-check`，启动只用于检查界面的隔�
 | 邮箱 | [chenyuntao0123@icloud.com](mailto:chenyuntao0123@icloud.com) |
 | 仓库 | [github.com/chenyuntaot/Barclip](https://github.com/chenyuntaot/Barclip) |
 
-© 2026 陈云涛
+© 2026 Yuntao Chen
