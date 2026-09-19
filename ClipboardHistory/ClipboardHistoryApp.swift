@@ -10,6 +10,7 @@ struct ClipboardHistoryApp: App {
             ClipboardMenuView()
                 .environment(delegate.store)
                 .environment(delegate.fileStore)
+                .environment(delegate.launchAtLogin)
         } label: {
             MenuBarExtraLabel()
         }
@@ -39,6 +40,7 @@ struct ClipboardGlyph: View {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store: ClipboardStore
     let fileStore: FileStagingStore
+    let launchAtLogin: LaunchAtLoginStore
     private var dropShelf: DropShelfController?
     private var testPasteboard: NSPasteboard?
     private var testDirectory: URL?
@@ -63,6 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     defaults: defaults,
                     repository: FileStagingRepository(fileURL: directory.appending(path: "file-staging.json"))
                 )
+                launchAtLogin = LaunchAtLoginStore()
                 super.init()
                 board.setString("这是一条用于界面验证的模拟文本。\n支持中文、多行和 Emoji 📝", forType: .string)
                 return
@@ -71,6 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
         store = ClipboardStore()
         fileStore = FileStagingStore()
+        launchAtLogin = LaunchAtLoginStore()
         super.init()
         dropShelf = DropShelfController(store: fileStore)
     }

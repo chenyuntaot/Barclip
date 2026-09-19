@@ -38,9 +38,9 @@ final class ViewRenderingTests: XCTestCase {
         try render(menu(store, files, initialKind: .image), name: "images", appearance: .light)
         try render(menu(store, files, isShowingSettings: true), name: "settings-page", appearance: .light)
         try render(menu(store, files, isShowingAbout: true), name: "about-page", appearance: .light)
-        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
+        try render(settings(store, files).padding(16).frame(width: 360),
                    name: "settings", appearance: .light)
-        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
+        try render(settings(store, files).padding(16).frame(width: 360),
                    name: "settings", appearance: .dark)
         try render(ClipboardAboutView().padding(16).frame(width: 360),
                    name: "about", appearance: .light)
@@ -50,7 +50,7 @@ final class ViewRenderingTests: XCTestCase {
         try render(MenuBarExtraLabel().padding(8), name: "menu-bar-icon", appearance: .dark)
         try render(menu(store, files), name: "empty-en", appearance: .light,
                    locale: Locale(identifier: "en"))
-        try render(ClipboardSettingsView().environment(store).environment(files).padding(16).frame(width: 360),
+        try render(settings(store, files).padding(16).frame(width: 360),
                    name: "settings-en", appearance: .light, locale: Locale(identifier: "en"))
         try render(ClipboardAboutView().padding(16).frame(width: 360),
                    name: "about-en", appearance: .light, locale: Locale(identifier: "en"))
@@ -101,6 +101,9 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertEqual(String(localized: "退出后清空", bundle: english), "Clear on Quit")
         XCTAssertEqual(String(localized: "磁盘缓存", bundle: english), "Disk Cache")
         XCTAssertEqual(String(localized: "文件夹地址", bundle: english), "Folder Path")
+        XCTAssertEqual(String(localized: "启动", bundle: english), "Startup")
+        XCTAssertEqual(String(localized: "登录时打开", bundle: english), "Open at Login")
+        XCTAssertEqual(String(localized: "打开登录项设置", bundle: english), "Open Login Items")
         XCTAssertEqual(String(localized: "关于我们", bundle: english), "About")
         XCTAssertEqual(String(localized: "已复制，可使用 ⌘V 粘贴。", bundle: english), "Copied. Paste with ⌘V.")
         XCTAssertEqual(ClipboardStore.StatusMessage.copied.allowsRetry, false)
@@ -122,9 +125,7 @@ final class ViewRenderingTests: XCTestCase {
             repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
                 .appending(path: suite).appending(path: "file-staging.json"))
         )
-        let host = NSHostingController(rootView: ClipboardSettingsView()
-            .environment(store)
-            .environment(files)
+        let host = NSHostingController(rootView: settings(store, files)
             .environment(\.locale, Locale(identifier: "zh_Hans"))
             .frame(width: 360))
         let size = host.sizeThatFits(in: CGSize(width: 360, height: 0))
@@ -228,6 +229,14 @@ final class ViewRenderingTests: XCTestCase {
         )
         .environment(store)
         .environment(files)
+        .environment(LaunchAtLoginStore(service: FakeLaunchAtLoginService()))
+    }
+
+    private func settings(_ store: ClipboardStore, _ files: FileStagingStore) -> some View {
+        ClipboardSettingsView()
+            .environment(store)
+            .environment(files)
+            .environment(LaunchAtLoginStore(service: FakeLaunchAtLoginService()))
     }
 
     private func render<Content: View>(

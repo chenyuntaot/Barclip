@@ -1,8 +1,10 @@
+import AppKit
 import SwiftUI
 
 struct ClipboardSettingsView: View {
     @Environment(ClipboardStore.self) private var store
     @Environment(FileStagingStore.self) private var files
+    @Environment(LaunchAtLoginStore.self) private var launchAtLogin
     @State private var didCopyCachePath: Bool?
     var onOpenAbout: () -> Void = {}
 
@@ -46,6 +48,28 @@ struct ClipboardSettingsView: View {
                     SettingsSectionHeader(title: "保存策略", explanation: "选择重启后保留时，文本、图片和文件位置保存在用户资料库的 Application Support/Barclip 中。删除应用不会删除这些记录。切换为退出后清空会删除当前磁盘缓存，当前记录仍可使用。旧版缓存迁移后保留在原位置。")
                 }
                 Section {
+                    Toggle("登录时打开", isOn: Binding(
+                        get: { launchAtLogin.isToggleOn },
+                        set: { launchAtLogin.setEnabled($0) }
+                    ))
+                    .accessibilityHint("登录 Mac 时自动启动 Barclip")
+                    if let message = launchAtLogin.message {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundStyle(launchAtLogin.status == .requiresApproval ? Color.secondary : Color.red)
+                        if launchAtLogin.status == .requiresApproval {
+                            Button("打开登录项设置") {
+                                launchAtLogin.openLoginItemsSettings()
+                            }
+                        }
+                    }
+                } header: {
+                    SettingsSectionHeader(
+                        title: "启动",
+                        explanation: "登录 Mac 时自动启动 Barclip。首次打开可能需要在系统设置的登录项中允许。从 Xcode 或非正式安装位置运行时，系统可能拒绝注册。"
+                    )
+                }
+                Section {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("文件夹地址")
                             .font(.caption)
@@ -78,6 +102,10 @@ struct ClipboardSettingsView: View {
             aboutFooter
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onAppear { launchAtLogin.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            launchAtLogin.refresh()
+        }
     }
 
     private var aboutFooter: some View {

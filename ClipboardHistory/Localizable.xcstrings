@@ -853,6 +853,94 @@
         }
       }
     },
+    "启动" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startup"
+          }
+        }
+      }
+    },
+    "登录时打开" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open at Login"
+          }
+        }
+      }
+    },
+    "登录 Mac 时自动启动 Barclip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Barclip automatically when you log in to this Mac"
+          }
+        }
+      }
+    },
+    "登录 Mac 时自动启动 Barclip。首次打开可能需要在系统设置的登录项中允许。从 Xcode 或非正式安装位置运行时，系统可能拒绝注册。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barclip opens automatically when you log in to this Mac. The first time, macOS may ask you to allow it in Login Items. Copies launched from Xcode or another unofficial location may not be able to register."
+          }
+        }
+      }
+    },
+    "系统尚未允许此登录项。请在系统设置中允许 Barclip。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS has not allowed this login item yet. Allow Barclip in System Settings."
+          }
+        }
+      }
+    },
+    "打开登录项设置" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Login Items"
+          }
+        }
+      }
+    },
+    "当前安装位置无法注册开机启动。请将 Barclip 放到应用程序文件夹后再试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This copy of Barclip cannot register for login. Move it to the Applications folder and try again."
+          }
+        }
+      }
+    },
+    "无法更新开机启动，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t update Open at Login. Please try again."
+          }
+        }
+      }
+    },
     "项目仓库" : {
       "extractionState" : "manual",
       "localizations" : {
