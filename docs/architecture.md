@@ -7,7 +7,7 @@
 
 使用菜单栏弹出面板中的设置页，避免为设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回。历史、文件、设置和关于共用固定面板尺寸，过渡只用短时透明度并裁剪在窗口内，避免菜单栏窗口缩放后液态玻璃在边缘留下残影。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮冲突。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。
 
-开机启动使用 `ServiceManagement.SMAppService.mainApp`，直接把当前 `Barclip.app` 登记为登录项。最低系统为 macOS 14，因此不嵌入登录助手，也不使用已弃用的 `SMLoginItemSetEnabled` 或自写 LaunchAgent。开关状态读取系统登录项，不在应用偏好里再存一份，避免用户在系统设置中关闭后应用内仍然显示已打开。需要用户批准时打开系统登录项面板；从 Xcode 或其他非正式位置运行时，系统可能返回 `notFound`，界面提示把应用放到应用程序文件夹。测试注入模拟服务，避免 XCTest 修改本机登录项。
+开机启动使用 `ServiceManagement.SMAppService.mainApp`，直接把当前 `Barclip.app` 登记为登录项。最低系统为 macOS 14，因此不嵌入登录助手，也不使用已弃用的 `SMLoginItemSetEnabled` 或自写 LaunchAgent。开关状态读取系统登录项，不在应用偏好里再存一份，避免用户在系统设置中关闭后应用内仍然显示已打开。需要用户批准时打开系统登录项面板。从 Xcode 或其他非正式位置运行时系统可能返回 `notFound`，界面不再为此单独提示。测试注入模拟服务，避免 XCTest 修改本机登录项。
 
 文件暂存与剪贴板历史分开。拖入只保存 bookmark，不把文件字节写入 Application Support。从网格拖出时用 `NSFilePromiseProvider` 生成副本，避免访达把原件当成移动。拖文件时不尝试程序化打开 MenuBarExtra，只显示从菜单栏图标展开的非激活气泡；检测要求拖放剪贴板 changeCount 增加且指针已超过拖动阈值，不使用辅助功能，也不把普通点击当成拖动。
 
@@ -31,7 +31,7 @@
 - `Views/FileStagingView.swift` / `DropShelfView.swift`：两列文件网格与菜单栏气泡。
 - `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示、设置与关于入口。历史/文件/设置/关于共用固定面板尺寸，进出设置只做透明度过渡。
 - `Stores/LaunchAtLoginStore.swift`：设置页开机启动开关的展示状态与错误提示，系统登录项是唯一事实来源。
-- `Services/LaunchAtLoginService.swift`：`SMAppService.mainApp` 注册/注销当前应用，并打开系统登录项设置。需要批准、安装位置无法注册、用户取消或系统失败时由 Store 给出提示。
+- `Services/LaunchAtLoginService.swift`：`SMAppService.mainApp` 注册/注销当前应用，并打开系统登录项设置。需要批准、用户取消或系统失败时由 Store 给出提示；安装位置无法注册时不展示单独标语。
 - `Views/ClipboardSettingsView.swift`：容量、保存策略、登录时打开、带复制按钮的实际缓存目录，以及底部程序版本 / 关于我们 / 版权入口。缓存目录直接读取 `HistoryRepository` 的路径定义，避免展示地址与实际存储位置不一致。复制地址复用 Store 注入的剪贴板服务，并更新 changeCount 防止路径被自动收录；成功或失败反馈放在设置 View 的局部状态。四个分区的说明收纳在标题右侧的 `info.circle` 按钮中，共用 `SettingsSectionHeader`；使用局部 `@State` 和原生 SwiftUI `.popover`，由系统处理外部点击关闭，不添加全局点击监听或第三方依赖。开机启动不写入 UserDefaults。
 - `Views/ClipboardAboutView.swift`：程序版本和关于我们页面，展示编译后的应用图标。
 

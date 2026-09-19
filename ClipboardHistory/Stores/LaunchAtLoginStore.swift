@@ -55,7 +55,7 @@ final class LaunchAtLoginStore {
         case .requiresApproval:
             String(localized: "系统尚未允许此登录项。请在系统设置中允许 Barclip。")
         case .notFound:
-            String(localized: "当前安装位置无法注册开机启动。请将 Barclip 放到应用程序文件夹后再试。")
+            didFail ? String(localized: "无法更新开机启动，请重试。") : nil
         }
     }
 }

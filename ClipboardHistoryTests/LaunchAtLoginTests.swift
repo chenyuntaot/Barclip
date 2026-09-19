@@ -45,13 +45,17 @@ final class LaunchAtLoginTests: XCTestCase {
         XCTAssertEqual(service.setEnabledCalls, [true])
     }
 
-    func testNotFoundShowsInstallLocationMessage() {
+    func testNotFoundDoesNotShowInstallLocationMessage() {
+        let existing = LaunchAtLoginStore(service: FakeLaunchAtLoginService(status: .notFound))
+        XCTAssertNil(existing.message)
+        XCTAssertFalse(existing.isToggleOn)
+
         let service = FakeLaunchAtLoginService(statusAfterSet: .notFound)
         let store = LaunchAtLoginStore(service: service)
         store.setEnabled(true)
         XCTAssertEqual(store.status, .notFound)
         XCTAssertFalse(store.isToggleOn)
-        XCTAssertEqual(store.message, String(localized: "当前安装位置无法注册开机启动。请将 Barclip 放到应用程序文件夹后再试。"))
+        XCTAssertNil(store.message)
     }
 
     func testServiceFailureShowsRetryMessageAndRefreshesStatus() {
