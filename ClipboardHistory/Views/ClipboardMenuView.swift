@@ -399,10 +399,12 @@ private struct KindRailButtonBody: View {
     }
 
     private var labelColor: Color {
-        if isSelected { .accentColor }
-        else if isHovered && isEnabled { .primary }
-        else { .secondary }
+        if isSelected { return Self.selectedRailColor }
+        if isEnabled { return .primary }
+        return .primary.opacity(0.45)
     }
+
+    private static let selectedRailColor = Color(red: 0.04, green: 0.24, blue: 0.60)
 
     private var hoverScale: CGFloat {
         if configuration.isPressed { 0.97 }

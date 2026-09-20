@@ -5,7 +5,7 @@
 原生 Swift 6 + SwiftUI，最低 macOS 14（Observation）。不引入第三方运行依赖。
 `ClipboardHistoryApp` 只创建 `MenuBarExtra` 作为主面板，并另建一个预创建的非激活 `NSPanel` 作为拖文件时的暂存条，不创建 Dock 主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。应用图标使用仓库根目录的 Icon Composer 文件 `AppIcon.icon`，由 asset catalog 编译进应用包。菜单栏 Extra 和使用页左上角标题都使用用户提供的剪贴板线稿做成的模板图 `MenuBarIcon`。黑底转为透明，由系统按浅色/深色界面着色，不使用彩色 AppIcon 或系统 `clipboard` 符号。
 
-使用菜单栏弹出面板中的设置页，避免为设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、图片选中项、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回。历史、文件、设置和关于共用固定面板尺寸，过渡只用短时透明度并裁剪在窗口内，避免菜单栏窗口缩放后液态玻璃在边缘留下残影。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮冲突。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。图片历史点击后写回剪贴板，并复用文件页的 `RailGlassEffect` 表示选中，不额外绘制强调色背景或描边；按空格把内存中的 PNG 交给共用浮动预览窗口，不为预览落地临时文件。
+使用菜单栏弹出面板中的设置页，避免为设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、图片选中项、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回。历史、文件、设置和关于共用固定面板尺寸，过渡只用短时透明度并裁剪在窗口内，避免菜单栏窗口缩放后液态玻璃在边缘留下残影。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮冲突。侧栏未选中文字和图标使用深黑色，选中态使用深蓝色并加 Liquid Glass（仅选中项）；悬停只放大。图片历史点击后写回剪贴板，并复用文件页的 `RailGlassEffect` 表示选中，不额外绘制强调色背景或描边；按空格把内存中的 PNG 交给共用浮动预览窗口，不为预览落地临时文件。
 
 开机启动使用 `ServiceManagement.SMAppService.mainApp`，直接把当前 `Barclip.app` 登记为登录项。最低系统为 macOS 14，因此不嵌入登录助手，也不使用已弃用的 `SMLoginItemSetEnabled` 或自写 LaunchAgent。开关状态读取系统登录项，不在应用偏好里再存一份，避免用户在系统设置中关闭后应用内仍然显示已打开。需要用户批准时打开系统登录项面板。从 Xcode 或其他非正式位置运行时系统可能返回 `notFound`，界面不再为此单独提示。测试注入模拟服务，避免 XCTest 修改本机登录项。
 
