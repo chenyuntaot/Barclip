@@ -10,6 +10,7 @@ final class FileQuickLookController: NSObject, NSWindowDelegate {
     private let previewView: QLPreviewView
     private let imageView: NSImageView
     private var currentURL: URL?
+    private var currentClipboardImageID: UUID?
     private var accessURL: URL?
 
     var isVisible: Bool { panel.isVisible }
@@ -68,6 +69,7 @@ final class FileQuickLookController: NSObject, NSWindowDelegate {
             return false
         }
         currentURL = fileURL
+        currentClipboardImageID = nil
         panel.title = fileURL.lastPathComponent
         let image = FileThumbnail.previewImage(at: fileURL)
         if image != nil || isImageFile(fileURL) {
@@ -80,17 +82,31 @@ final class FileQuickLookController: NSObject, NSWindowDelegate {
             imageView.isHidden = true
             previewView.isHidden = false
         }
-        if let screen = NSScreen.main?.visibleFrame ?? NSScreen.screens.first?.visibleFrame {
-            var frame = panel.frame
-            frame.origin.x = screen.midX - frame.width / 2
-            frame.origin.y = screen.midY - frame.height / 2
-            panel.setFrame(frame, display: true)
-        }
-        NSApp.activate(ignoringOtherApps: true)
-        panel.makeKeyAndOrderFront(nil)
+        showPanel()
         if imageView.isHidden {
             previewView.previewItem = fileURL as NSURL
         }
+        return true
+    }
+
+    @discardableResult
+    func present(imagePNG: Data, id: UUID) -> Bool {
+        guard let image = NSImage(data: imagePNG), image.size.width > 0, image.size.height > 0 else {
+            return false
+        }
+        if panel.isVisible, currentClipboardImageID == id {
+            hide()
+            return true
+        }
+        releaseAccess()
+        currentURL = nil
+        currentClipboardImageID = id
+        panel.title = String(localized: "预览")
+        previewView.previewItem = nil
+        previewView.isHidden = true
+        imageView.image = image
+        imageView.isHidden = false
+        showPanel()
         return true
     }
 
@@ -99,6 +115,7 @@ final class FileQuickLookController: NSObject, NSWindowDelegate {
         previewView.previewItem = nil
         imageView.image = nil
         currentURL = nil
+        currentClipboardImageID = nil
         releaseAccess()
     }
 
@@ -106,7 +123,19 @@ final class FileQuickLookController: NSObject, NSWindowDelegate {
         previewView.previewItem = nil
         imageView.image = nil
         currentURL = nil
+        currentClipboardImageID = nil
         releaseAccess()
+    }
+
+    private func showPanel() {
+        if let screen = NSScreen.main?.visibleFrame ?? NSScreen.screens.first?.visibleFrame {
+            var frame = panel.frame
+            frame.origin.x = screen.midX - frame.width / 2
+            frame.origin.y = screen.midY - frame.height / 2
+            panel.setFrame(frame, display: true)
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
     }
 
     private func isImageFile(_ url: URL) -> Bool {

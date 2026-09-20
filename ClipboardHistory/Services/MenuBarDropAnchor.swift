@@ -3,12 +3,10 @@ import CoreGraphics
 
 struct DropShelfPlacement: Equatable, Sendable {
     var frame: CGRect
-    var arrowX: CGFloat
 }
 
 enum MenuBarDropAnchor {
     static let shelfSize = CGSize(width: 236, height: 104)
-    static let arrowHeight: CGFloat = 10
     @MainActor
     private static var rememberedAnchor: CGRect?
 
@@ -74,7 +72,6 @@ enum MenuBarDropAnchor {
         let anchorX = item?.midX ?? (screen.maxX - 148)
         var x = anchorX - size.width / 2
         x = min(max(screen.minX + 8, x), max(screen.minX + 8, screen.maxX - size.width - 8))
-        let arrowX = min(max(18, anchorX - x), size.width - 18)
         let y: CGFloat
         if let item {
             y = item.minY - 2 - size.height
@@ -82,8 +79,7 @@ enum MenuBarDropAnchor {
             y = screen.maxY - 24 - size.height
         }
         return DropShelfPlacement(
-            frame: CGRect(x: x, y: max(screen.minY + 8, y), width: size.width, height: size.height),
-            arrowX: arrowX
+            frame: CGRect(x: x, y: max(screen.minY + 8, y), width: size.width, height: size.height)
         )
     }
 

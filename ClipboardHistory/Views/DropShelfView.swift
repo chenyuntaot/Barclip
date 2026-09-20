@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DropShelfView: View {
     @Binding var isTargeted: Bool
-    var arrowX: CGFloat = MenuBarDropAnchor.shelfSize.width / 2
     var isExpanded: Bool = true
     var onDrop: ([URL]) -> Void
 
@@ -18,27 +17,20 @@ struct DropShelfView: View {
                 .foregroundStyle(isTargeted ? Color.accentColor : Color.primary)
         }
         .padding(.horizontal, 16)
-        .padding(.top, MenuBarDropAnchor.arrowHeight + 10)
-        .padding(.bottom, 12)
+        .padding(.vertical, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background {
-            DropShelfBubble(arrowX: arrowX)
-                .fill(Color(nsColor: .windowBackgroundColor))
-        }
+        .modifier(DropShelfGlassEffect())
         .overlay {
-            DropShelfBubble(arrowX: arrowX)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(
-                    isTargeted ? Color.accentColor : Color.secondary.opacity(0.28),
-                    lineWidth: isTargeted ? 2 : 1
+                    isTargeted ? Color.accentColor : Color.clear,
+                    lineWidth: 2
                 )
         }
-        .clipShape(DropShelfBubble(arrowX: arrowX))
-        .contentShape(DropShelfBubble(arrowX: arrowX))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .compositingGroup()
-        .scaleEffect(
-            isExpanded ? 1 : 0.28,
-            anchor: UnitPoint(x: arrowX / MenuBarDropAnchor.shelfSize.width, y: 0)
-        )
+        .scaleEffect(isExpanded ? 1 : 0.28, anchor: .top)
         .opacity(isExpanded ? 1 : 0)
         .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
             FileStagingTransfer.scheduleLoad(providers) { urls in
@@ -52,64 +44,16 @@ struct DropShelfView: View {
     }
 }
 
-private struct DropShelfBubble: InsettableShape {
-    var arrowX: CGFloat
-    var insetAmount: CGFloat = 0
-
-    func path(in rect: CGRect) -> Path {
-        let insetRect = rect.insetBy(dx: insetAmount, dy: insetAmount)
-        let arrowHeight = MenuBarDropAnchor.arrowHeight
-        let arrowHalf: CGFloat = 9
-        let bubble = CGRect(
-            x: insetRect.minX,
-            y: insetRect.minY + arrowHeight,
-            width: insetRect.width,
-            height: max(0, insetRect.height - arrowHeight)
-        )
-        let radius = max(4, 14 - insetAmount)
-        let cx = min(max(bubble.minX + radius + arrowHalf, arrowX), bubble.maxX - radius - arrowHalf)
-        var path = Path()
-        path.move(to: CGPoint(x: bubble.minX + radius, y: bubble.minY))
-        path.addLine(to: CGPoint(x: cx - arrowHalf, y: bubble.minY))
-        path.addLine(to: CGPoint(x: cx, y: insetRect.minY))
-        path.addLine(to: CGPoint(x: cx + arrowHalf, y: bubble.minY))
-        path.addLine(to: CGPoint(x: bubble.maxX - radius, y: bubble.minY))
-        path.addArc(
-            center: CGPoint(x: bubble.maxX - radius, y: bubble.minY + radius),
-            radius: radius,
-            startAngle: .degrees(-90),
-            endAngle: .degrees(0),
-            clockwise: false
-        )
-        path.addLine(to: CGPoint(x: bubble.maxX, y: bubble.maxY - radius))
-        path.addArc(
-            center: CGPoint(x: bubble.maxX - radius, y: bubble.maxY - radius),
-            radius: radius,
-            startAngle: .degrees(0),
-            endAngle: .degrees(90),
-            clockwise: false
-        )
-        path.addLine(to: CGPoint(x: bubble.minX + radius, y: bubble.maxY))
-        path.addArc(
-            center: CGPoint(x: bubble.minX + radius, y: bubble.maxY - radius),
-            radius: radius,
-            startAngle: .degrees(90),
-            endAngle: .degrees(180),
-            clockwise: false
-        )
-        path.addLine(to: CGPoint(x: bubble.minX, y: bubble.minY + radius))
-        path.addArc(
-            center: CGPoint(x: bubble.minX + radius, y: bubble.minY + radius),
-            radius: radius,
-            startAngle: .degrees(180),
-            endAngle: .degrees(270),
-            clockwise: false
-        )
-        path.closeSubpath()
-        return path
-    }
-
-    func inset(by amount: CGFloat) -> DropShelfBubble {
-        DropShelfBubble(arrowX: arrowX, insetAmount: insetAmount + amount)
+private struct DropShelfGlassEffect: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        if #available(macOS 26.0, *) {
+            content.glassEffect(.regular, in: shape)
+        } else {
+            content.background {
+                shape.fill(.ultraThinMaterial)
+            }
+        }
     }
 }

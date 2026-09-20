@@ -36,6 +36,12 @@ final class ViewRenderingTests: XCTestCase {
         store.poll()
         await store.finishPendingSave()
         try render(menu(store, files, initialKind: .image), name: "images", appearance: .light)
+        let selectedImageID = try XCTUnwrap(store.entries(for: .image).first?.id)
+        try render(
+            menu(store, files, initialKind: .image, initialSelectedImageID: selectedImageID),
+            name: "images-selected",
+            appearance: .light
+        )
         try render(menu(store, files, isShowingSettings: true), name: "settings-page", appearance: .light)
         try render(menu(store, files, isShowingAbout: true), name: "about-page", appearance: .light)
         try render(settings(store, files).padding(16).frame(width: 360),
@@ -100,6 +106,10 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertEqual(String(localized: "拖到此处暂存", bundle: english), "Drop to Stage")
         XCTAssertEqual(String(localized: "暂存区只记录文件引用。", bundle: english), "Staging only stores file references.")
         XCTAssertEqual(String(localized: "预览", bundle: english), "Preview")
+        XCTAssertEqual(
+            String(localized: "点击复制并选中，按空格预览", bundle: english),
+            "Click to copy and select, then press Space to preview"
+        )
         XCTAssertEqual(String(localized: "退出后清空", bundle: english), "Clear on Quit")
         XCTAssertEqual(String(localized: "磁盘缓存", bundle: english), "Disk Cache")
         XCTAssertEqual(String(localized: "文件夹地址", bundle: english), "Folder Path")
@@ -221,13 +231,15 @@ final class ViewRenderingTests: XCTestCase {
         initialKind: ClipboardKind = .text,
         isShowingSettings: Bool = false,
         isShowingAbout: Bool = false,
-        showsFiles: Bool = false
+        showsFiles: Bool = false,
+        initialSelectedImageID: ClipboardEntry.ID? = nil
     ) -> some View {
         ClipboardMenuView(
             initialKind: initialKind,
             isShowingSettings: isShowingSettings,
             isShowingAbout: isShowingAbout,
-            showsFiles: showsFiles
+            showsFiles: showsFiles,
+            initialSelectedImageID: initialSelectedImageID
         )
         .environment(store)
         .environment(files)

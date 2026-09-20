@@ -209,7 +209,6 @@ final class FileStagingTests: XCTestCase {
         XCTAssertEqual(placement.frame.width, MenuBarDropAnchor.shelfSize.width)
         XCTAssertEqual(placement.frame.maxX, 1211 + MenuBarDropAnchor.shelfSize.width / 2, accuracy: 1)
         XCTAssertEqual(placement.frame.maxY, status.minY - 2, accuracy: 0.5)
-        XCTAssertEqual(placement.arrowX, MenuBarDropAnchor.shelfSize.width / 2, accuracy: 1)
     }
 
     func testShelfFallbackStaysNearTrailingMenuBarNotScreenCenter() {
@@ -242,6 +241,19 @@ final class FileStagingTests: XCTestCase {
         XCTAssertTrue(FileQuickLookController.shared.present(item: item))
         FileQuickLookController.shared.hide()
         XCTAssertFalse(FileQuickLookController.shared.isVisible)
+    }
+
+    func testClipboardImagePreviewOpensAndSpaceStyleToggleClosesIt() {
+        let controller = FileQuickLookController.shared
+        controller.hide()
+        XCTAssertFalse(controller.present(imagePNG: Data(), id: UUID()))
+        XCTAssertFalse(controller.isVisible)
+
+        let imageID = UUID()
+        XCTAssertTrue(controller.present(imagePNG: TestPNG.pixel, id: imageID))
+        XCTAssertTrue(controller.isVisible)
+        XCTAssertTrue(controller.present(imagePNG: TestPNG.pixel, id: imageID))
+        XCTAssertFalse(controller.isVisible)
     }
 
     func testDropShelfPanelIsNonactivatingAndHiddenUntilShown() throws {

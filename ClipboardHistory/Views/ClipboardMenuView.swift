@@ -14,12 +14,16 @@ struct ClipboardMenuView: View {
     @State private var showsSettings = false
     @State private var showsAbout = false
     @State private var selectedSection: SidebarSection
+    @State private var selectedImageID: ClipboardEntry.ID?
+    @State private var imagePreviewKeyMonitor: Any?
+    @FocusState private var historyFocused: Bool
 
     init(
         initialKind: ClipboardKind = .text,
         isShowingSettings: Bool = false,
         isShowingAbout: Bool = false,
-        showsFiles: Bool = false
+        showsFiles: Bool = false,
+        initialSelectedImageID: ClipboardEntry.ID? = nil
     ) {
         if showsFiles {
             _selectedSection = State(initialValue: .files)
@@ -28,6 +32,7 @@ struct ClipboardMenuView: View {
         }
         _showsSettings = State(initialValue: isShowingSettings || isShowingAbout)
         _showsAbout = State(initialValue: isShowingAbout)
+        _selectedImageID = State(initialValue: initialSelectedImageID)
     }
 
     private var isAccessoryPanel: Bool {
@@ -69,7 +74,15 @@ struct ClipboardMenuView: View {
         .padding(16)
         .clipped()
         .contentShape(Rectangle())
-        .onAppear { MenuBarDropAnchor.rememberOpenExtra() }
+        .onAppear {
+            MenuBarDropAnchor.rememberOpenExtra()
+            installImagePreviewKeyMonitor()
+            historyFocused = selectedSection == .image
+        }
+        .onDisappear { removeImagePreviewKeyMonitor() }
+        .onChange(of: selectedSection) { _, section in
+            historyFocused = section == .image
+        }
         .animation(.easeInOut(duration: 0.18), value: showsSettings)
         .animation(.easeInOut(duration: 0.18), value: showsAbout)
         .animation(.easeInOut(duration: 0.18), value: selectedSection)
@@ -263,26 +276,73 @@ struct ClipboardMenuView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 4) {
                 ForEach(currentEntries) { entry in
-                    Button { store.copy(entry) } label: {
+                    let isSelected = entry.kind == .image && selectedImageID == entry.id
+                    Button { activate(entry) } label: {
                         HStack(alignment: .top) {
-                            rowContent(for: entry)
+                            rowContent(for: entry, isSelected: isSelected)
                             Image(systemName: "doc.on.doc").foregroundStyle(.secondary)
                         }
-                        .padding(8).contentShape(Rectangle())
+                        .padding(8)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .help("点击重新复制")
+                    .help(entry.kind == .image ? "点击复制并选中，按空格预览" : "点击重新复制")
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
                     Divider()
                 }
             }
         }
         .frame(minHeight: 180, maxHeight: .infinity)
+        .focusable()
+        .focused($historyFocused)
+        .focusEffectDisabled()
+        .onKeyPress(.space) {
+            guard currentKind == .image else { return .ignored }
+            previewSelectedImage()
+            return .handled
+        }
+    }
+
+    private func activate(_ entry: ClipboardEntry) {
+        store.copy(entry)
+        guard entry.kind == .image else { return }
+        selectedImageID = store.entries(for: .image)
+            .first { $0.imagePNG == entry.imagePNG }?.id ?? entry.id
+        historyFocused = true
+    }
+
+    private func previewSelectedImage() {
+        guard let selectedImageID,
+              let entry = store.entries(for: .image).first(where: { $0.id == selectedImageID }),
+              let imagePNG = entry.imagePNG else { return }
+        FileQuickLookController.shared.present(imagePNG: imagePNG, id: entry.id)
+    }
+
+    private func installImagePreviewKeyMonitor() {
+        removeImagePreviewKeyMonitor()
+        imagePreviewKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            guard selectedSection == .image,
+                  !isAccessoryPanel,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty,
+                  event.charactersIgnoringModifiers == " " else { return event }
+            previewSelectedImage()
+            return nil
+        }
+    }
+
+    private func removeImagePreviewKeyMonitor() {
+        if let imagePreviewKeyMonitor {
+            NSEvent.removeMonitor(imagePreviewKeyMonitor)
+            self.imagePreviewKeyMonitor = nil
+        }
     }
 
     @ViewBuilder
-    private func rowContent(for entry: ClipboardEntry) -> some View {
+    private func rowContent(for entry: ClipboardEntry, isSelected: Bool) -> some View {
         if entry.kind == .image {
             imagePreview(entry.imagePNG)
+                .padding(8)
+                .modifier(RailGlassEffect(isActive: isSelected, cornerRadius: 12))
                 .frame(maxWidth: .infinity, alignment: .leading)
         } else {
             Text(entry.preview).lineLimit(3)

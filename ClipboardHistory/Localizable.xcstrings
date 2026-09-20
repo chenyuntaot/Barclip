@@ -512,6 +512,17 @@
         }
       }
     },
+    "点击复制并选中，按空格预览" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to copy and select, then press Space to preview"
+          }
+        }
+      }
+    },
     "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。" : {
       "extractionState" : "manual",
       "localizations" : {

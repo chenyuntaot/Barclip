@@ -47,20 +47,12 @@ Barclip 是一款专为 macOS 设计的菜单栏工具。它在后台整理最�
 
 ### 文本与图片历史
 
-文本和图片分别记录、独立计数。多行文本、中文、Emoji 和原始空白格式均会保留；图片以缩略图浏览，点击后即可重新复制。
+文本和图片分别记录、独立计数。多行文本、中文、Emoji 和原始空白格式均会保留；图片以缩略图浏览。点击图片会重新复制并显示选中效果，随后可按空格打开预览。
 
-<table>
-  <tr>
-    <td width="58%" align="center">
-      <img src="docs/images/barclip-image-history.png" alt="Barclip 图片历史">
-      <br><sub>图片历史与缩略图浏览</sub>
-    </td>
-    <td width="42%" align="center">
-      <img src="docs/images/barclip-multiline-text.png" alt="Barclip 多行文本记录">
-      <br><sub>保留多行文本、中文与 Emoji</sub>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/images/barclip-image-history.png" width="720" alt="Barclip 图片历史">
+  <br><sub>图片历史与缩略图浏览</sub>
+</p>
 
 ### 文件暂存
 
@@ -119,7 +111,7 @@ open build/Build/Products/Debug/Barclip.app
 
 1. 在任意应用中复制文本或图片；系统截图进入剪贴板后也可被记录。
 2. 点击菜单栏中的 Barclip 图标，在“文本”或“图片”分类中找到需要的内容。
-3. 点击记录将其重新写入系统剪贴板，再回到目标应用使用 `⌘V` 粘贴。
+3. 点击记录将其重新写入系统剪贴板，再回到目标应用使用 `⌘V` 粘贴；图片被选中后可按空格预览。
 4. 将文件拖向菜单栏图标进行暂存；在“文件”分类中可拖出副本、空格预览或双击打开。
 5. 在设置中调整历史容量、保存策略和“登录时打开”。
 

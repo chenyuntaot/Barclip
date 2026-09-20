@@ -5,11 +5,11 @@
 原生 Swift 6 + SwiftUI，最低 macOS 14（Observation）。不引入第三方运行依赖。
 `ClipboardHistoryApp` 只创建 `MenuBarExtra` 作为主面板，并另建一个预创建的非激活 `NSPanel` 作为拖文件时的暂存条，不创建 Dock 主窗口。生成的 Info.plist 设置 `LSUIElement = YES`、`CFBundleDisplayName = Barclip`，AppDelegate 同时设置 `.accessory` 激活策略。产物名称为 `Barclip.app`，Swift 模块名仍为 `ClipboardHistory`。应用图标使用仓库根目录的 Icon Composer 文件 `AppIcon.icon`，由 asset catalog 编译进应用包。菜单栏 Extra 和使用页左上角标题都使用用户提供的剪贴板线稿做成的模板图 `MenuBarIcon`。黑底转为透明，由系统按浅色/深色界面着色，不使用彩色 AppIcon 或系统 `clipboard` 符号。
 
-使用菜单栏弹出面板中的设置页，避免为设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回。历史、文件、设置和关于共用固定面板尺寸，过渡只用短时透明度并裁剪在窗口内，避免菜单栏窗口缩放后液态玻璃在边缘留下残影。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮冲突。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。
+使用菜单栏弹出面板中的设置页，避免为设置项引入独立窗口。`ClipboardMenuView` 本地管理分类、图片选中项、设置页与关于页切换，Store 通过 Environment 注入。进入设置或关于页时侧栏与分隔线收起，左右合为一块，仅左上角保留返回。历史、文件、设置和关于共用固定面板尺寸，过渡只用短时透明度并裁剪在窗口内，避免菜单栏窗口缩放后液态玻璃在边缘留下残影。关于页不另开窗口，也不在 MenuBarExtra 中使用 NavigationStack，以免和现有返回按钮冲突。侧栏选中态为强调色文字加 Liquid Glass（仅选中项）；悬停只放大并略加深字色。图片历史点击后写回剪贴板，并复用文件页的 `RailGlassEffect` 表示选中，不额外绘制强调色背景或描边；按空格把内存中的 PNG 交给共用浮动预览窗口，不为预览落地临时文件。
 
 开机启动使用 `ServiceManagement.SMAppService.mainApp`，直接把当前 `Barclip.app` 登记为登录项。最低系统为 macOS 14，因此不嵌入登录助手，也不使用已弃用的 `SMLoginItemSetEnabled` 或自写 LaunchAgent。开关状态读取系统登录项，不在应用偏好里再存一份，避免用户在系统设置中关闭后应用内仍然显示已打开。需要用户批准时打开系统登录项面板。从 Xcode 或其他非正式位置运行时系统可能返回 `notFound`，界面不再为此单独提示。测试注入模拟服务，避免 XCTest 修改本机登录项。
 
-文件暂存与剪贴板历史分开。拖入只保存 bookmark，不把文件字节写入 Application Support。从网格拖出时用 `NSFilePromiseProvider` 生成副本，避免访达把原件当成移动。拖文件时不尝试程序化打开 MenuBarExtra，只显示从菜单栏图标展开的非激活气泡；检测要求拖放剪贴板 changeCount 增加且指针已超过拖动阈值，不使用辅助功能，也不把普通点击当成拖动。
+文件暂存与剪贴板历史分开。拖入只保存 bookmark，不把文件字节写入 Application Support。从网格拖出时用 `NSFilePromiseProvider` 生成副本，避免访达把原件当成移动。拖文件时不尝试程序化打开 MenuBarExtra，只显示从菜单栏图标展开的非激活暂存条；暂存条使用简单的圆角矩形，macOS 26 使用原生 Liquid Glass，旧系统回退到 `ultraThinMaterial`。检测要求拖放剪贴板 changeCount 增加且指针已超过拖动阈值，不使用辅助功能，也不把普通点击当成拖动。
 
 ## 责任划分
 
@@ -25,11 +25,11 @@
 - `Services/FileStagingTransfer.swift`：拖入 URL 解析、拖出文件 Promise 复制。
 - `Services/DragSessionMonitor.swift`：拖放剪贴板与指针状态。
 - `Services/MenuBarDropAnchor.swift`：暂存条定位，优先菜单栏图标，其次右上，不用屏幕中央。
-- `Services/DropShelfController.swift`：非激活菜单栏气泡暂存条。
+- `Services/DropShelfController.swift`：非激活菜单栏圆角矩形暂存条。
 - `Services/FileThumbnail.swift`：图片 ImageIO 缩略图与预览位图。
-- `Services/FileQuickLookController.swift`：独立预览窗口；图片走位图，其他走 Quick Look。
-- `Views/FileStagingView.swift` / `DropShelfView.swift`：两列文件网格与菜单栏气泡。
-- `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、清空、状态提示、设置与关于入口。历史/文件/设置/关于共用固定面板尺寸，进出设置只做透明度过渡。
+- `Services/FileQuickLookController.swift`：独立预览窗口；文件图片与剪贴板内存 PNG 走位图，其他文件走 Quick Look；同一项再次预览时关闭窗口。
+- `Views/FileStagingView.swift` / `DropShelfView.swift`：两列文件网格，以及使用 Liquid Glass 的菜单栏圆角矩形暂存条。
+- `Views/ClipboardMenuView.swift`：左侧分类、历史、复制、图片选中与空格预览、清空、状态提示、设置与关于入口。历史/文件/设置/关于共用固定面板尺寸，进出设置只做透明度过渡。
 - `Stores/LaunchAtLoginStore.swift`：设置页开机启动开关的展示状态与错误提示，系统登录项是唯一事实来源。
 - `Services/LaunchAtLoginService.swift`：`SMAppService.mainApp` 注册/注销当前应用，并打开系统登录项设置。需要批准、用户取消或系统失败时由 Store 给出提示；安装位置无法注册时不展示单独标语。
 - `Views/ClipboardSettingsView.swift`：容量、保存策略、登录时打开、带复制按钮的实际缓存目录，以及底部程序版本 / 关于我们 / 版权入口。缓存目录直接读取 `HistoryRepository` 的路径定义，避免展示地址与实际存储位置不一致。复制地址复用 Store 注入的剪贴板服务，并更新 changeCount 防止路径被自动收录；成功或失败反馈放在设置 View 的局部状态。四个分区的说明收纳在标题右侧的 `info.circle` 按钮中，共用 `SettingsSectionHeader`；使用局部 `@State` 和原生 SwiftUI `.popover`，由系统处理外部点击关闭，不添加全局点击监听或第三方依赖。开机启动不写入 UserDefaults。

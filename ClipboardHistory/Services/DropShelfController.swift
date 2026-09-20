@@ -6,7 +6,6 @@ import SwiftUI
 @Observable
 final class DropShelfState {
     var isTargeted = false
-    var arrowX: CGFloat = MenuBarDropAnchor.shelfSize.width / 2
     var isExpanded = false
 }
 
@@ -53,7 +52,6 @@ final class DropShelfController {
         hideWork?.cancel()
         hideWork = nil
         let placement = MenuBarDropAnchor.currentPlacement(excluding: [panel.windowNumber])
-        state.arrowX = placement.arrowX
         state.isExpanded = false
         panel.setFrame(placement.frame, display: true)
         panel.alphaValue = 1
@@ -157,7 +155,6 @@ private struct DropShelfRoot: View {
     var body: some View {
         DropShelfView(
             isTargeted: $state.isTargeted,
-            arrowX: state.arrowX,
             isExpanded: state.isExpanded,
             onDrop: onDrop
         )
