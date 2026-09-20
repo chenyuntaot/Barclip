@@ -25,7 +25,7 @@ struct ClipboardAboutView: View {
             Section("关于我们") {
                 aboutRow(title: String(localized: "开发者"), value: AppInfo.developer)
                 aboutLink(title: String(localized: "联系邮箱"), value: AppInfo.contactEmail, destination: AppInfo.mailtoURL)
-                aboutLink(title: String(localized: "项目仓库"), value: AppInfo.repositoryURL.absoluteString, destination: AppInfo.repositoryURL)
+                aboutLinks(title: String(localized: "项目仓库"), destinations: AppInfo.repositoryURLs)
             }
             Section {
                 Text(AppInfo.copyright)
@@ -60,6 +60,21 @@ struct ClipboardAboutView: View {
                 .truncationMode(.middle)
                 .accessibilityLabel("\(title) \(value)")
                 .accessibilityHint("在默认应用中打开")
+        }
+    }
+
+    private func aboutLinks(title: String, destinations: [URL]) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            ForEach(destinations, id: \.self) { destination in
+                Link(destination.absoluteString, destination: destination)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+                    .accessibilityLabel("\(title) \(destination.absoluteString)")
+                    .accessibilityHint("在默认应用中打开")
+            }
         }
     }
 }

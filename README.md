@@ -19,6 +19,8 @@
 <p align="center">
   <a href="https://github.com/chenyuntaot/Barclip">GitHub</a>
   ·
+  <a href="https://gitee.com/chenyuntao-0123/barclip">Gitee</a>
+  ·
   <a href="docs/development.md">开发文档</a>
   ·
   <a href="docs/architecture.md">架构说明</a>
@@ -99,6 +101,6 @@ Debug 构建可加上 `--isolated-ui-check`，启动只用于检查界面的隔�
 | --- | --- |
 | 开发者 | 陈云涛 |
 | 邮箱 | [chenyuntao0123@icloud.com](mailto:chenyuntao0123@icloud.com) |
-| 仓库 | [github.com/chenyuntaot/Barclip](https://github.com/chenyuntaot/Barclip) |
+| 仓库 | [GitHub](https://github.com/chenyuntaot/Barclip) · [Gitee](https://gitee.com/chenyuntao-0123/barclip) |
 
 © 2026 Yuntao Chen

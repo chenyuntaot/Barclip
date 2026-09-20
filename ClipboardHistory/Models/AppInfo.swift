@@ -4,6 +4,8 @@ enum AppInfo: Sendable {
     static let developer = "陈云涛"
     static let contactEmail = "chenyuntao0123@icloud.com"
     static let repositoryURL = URL(string: "https://github.com/chenyuntaot/Barclip")!
+    static let giteeURL = URL(string: "https://gitee.com/chenyuntao-0123/barclip")!
+    static let repositoryURLs = [repositoryURL, giteeURL]
 
     static var displayName: String {
         string(for: "CFBundleDisplayName") ?? "Barclip"

@@ -14,7 +14,7 @@
 ## 责任划分
 
 - `Models/ClipboardEntry.swift`：文本/图片分类、原始文本或 PNG、预览和保存策略。
-- `Models/AppInfo.swift`：显示名、版本、版权、开发者与仓库等关于页元数据。
+- `Models/AppInfo.swift`：显示名、版本、版权、开发者与 GitHub / Gitee 仓库等关于页元数据。
 - `Services/PasteboardService.swift`：AppKit 剪贴板读写、文本与位图筛选、访问拒绝判断。
 - `Services/HistoryRepository.swift`：actor 隔离 JSON 元数据与图片 sidecar 读写。
 - `Stores/ClipboardStore.swift`：Observation 状态、轮询、去重、容量裁剪、恢复与保存编排。状态提示用 `StatusMessage` 枚举，界面按 `allowsRetry` 决定是否显示重试，不再用中文字符串前缀判断。
@@ -64,7 +64,7 @@ JSON 只保存文本和图片文件名，避免把位图 base64 进同一份文�
 
 界面只做简体中文和英文，跟随 macOS 系统语言，不在设置里放语言开关。源文案是中文，放在 `ClipboardHistory/Localizable.xcstrings`；英文写在同一份目录的 `en` 本地化里。工程 `developmentRegion` 为 `zh-Hans`。
 
-SwiftUI 字面量（`Text("设置")`、`Section`、`help`、`accessibilityLabel` 等）走 `LocalizedStringKey`。Store、模型标题、退出确认框没有 SwiftUI 环境，使用 `String(localized:)`，同样查这份目录。`Barclip`、开发者姓名「陈云涛」、邮箱、仓库地址和版权姓名 `Yuntao Chen` 不翻译。
+SwiftUI 字面量（`Text("设置")`、`Section`、`help`、`accessibilityLabel` 等）走 `LocalizedStringKey`。Store、模型标题、退出确认框没有 SwiftUI 环境，使用 `String(localized:)`，同样查这份目录。`Barclip`、开发者姓名「陈云涛」、邮箱、GitHub / Gitee 仓库地址和版权姓名 `Yuntao Chen` 不翻译。
 
 状态提示不再用 `message.hasPrefix("无法读取")` 这类易随翻译失效的判断，改为 `StatusMessage.allowsRetry`。
 
