@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 private enum MenuPanelMetrics {
+    static let panelPadding: CGFloat = 16
     static let railWidth: CGFloat = 64
     static let contentWidth: CGFloat = 360
     static let innerWidth: CGFloat = railWidth + contentWidth
@@ -43,7 +44,8 @@ struct ClipboardMenuView: View {
         HStack(alignment: .top, spacing: 0) {
             if !isAccessoryPanel {
                 railButtons
-                    .frame(width: MenuPanelMetrics.railWidth)
+                    .frame(width: MenuPanelMetrics.railWidth + MenuPanelMetrics.panelPadding)
+                    .padding(.leading, -MenuPanelMetrics.panelPadding)
                     .frame(maxHeight: .infinity, alignment: .top)
                     .transition(.opacity)
                 Divider()
@@ -71,7 +73,7 @@ struct ClipboardMenuView: View {
             height: MenuPanelMetrics.innerHeight,
             alignment: .top
         )
-        .padding(16)
+        .padding(MenuPanelMetrics.panelPadding)
         .clipped()
         .contentShape(Rectangle())
         .onAppear {
@@ -97,7 +99,7 @@ struct ClipboardMenuView: View {
     }
 
     private var railButtons: some View {
-        VStack(spacing: 8) {
+        VStack(alignment: .center, spacing: 8) {
             ForEach(SidebarSection.allCases) { section in
                 railButton(
                     title: LocalizedStringKey(section.titleKey),
@@ -113,6 +115,7 @@ struct ClipboardMenuView: View {
             }
             Spacer(minLength: 12)
             Divider()
+                .padding(.horizontal, 12)
             railButton(
                 title: selectedSection == .files ? "清空暂存" : "清空历史",
                 systemImage: "trash",
@@ -165,8 +168,10 @@ struct ClipboardMenuView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
             }
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(KindRailButtonStyle(isSelected: isSelected))
+        .frame(maxWidth: .infinity)
         .disabled(disabled)
     }
 
