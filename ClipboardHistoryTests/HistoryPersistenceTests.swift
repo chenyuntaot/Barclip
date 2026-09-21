@@ -68,7 +68,7 @@ final class HistoryPersistenceTests: XCTestCase {
         let (store, board) = try makeStore()
         store.setRetention(.persistent)
         for index in 0..<60 { board.publish("sample \(index)"); store.poll() }
-        store.setCapacity(10)
+        store.setCapacity(10, for: .text)
         await store.finishPendingSave()
         let (reopened, _) = try makeStore()
         await reopened.restore()
@@ -263,6 +263,24 @@ final class HistoryPersistenceTests: XCTestCase {
         await reopened.finishPendingSave()
         XCTAssertFalse(FileManager.default.fileExists(atPath: images.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+    }
+
+    func testWipeCacheDirectoryRemovesContentsAndKeepsMigrationMarker() async throws {
+        let repository = HistoryRepository(fileURL: fileURL)
+        try await repository.save(
+            [ClipboardEntry(text: "old text"), ClipboardEntry(imagePNG: TestPNG.pixel)],
+            revision: 1
+        )
+        try Data("leftover".utf8).write(to: directory.appending(path: "leftover.txt"))
+        try Data().write(to: directory.appending(path: ".DS_Store"))
+        try await repository.wipeCacheDirectory()
+        let remaining = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil
+        ).map(\.lastPathComponent).sorted()
+        XCTAssertEqual(remaining, [".migration-complete"])
+        let restored = try await HistoryRepository(fileURL: fileURL).load()
+        XCTAssertTrue(restored.isEmpty)
     }
 
     func testMissingImageSidecarSkipsEntryWithoutFailingLoad() async throws {

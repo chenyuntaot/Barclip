@@ -228,7 +228,7 @@ struct ClipboardMenuView: View {
                 .font(.headline)
                 .labelStyle(.titleAndIcon)
                 Spacer()
-                Text("\(currentEntries.count) / \(store.capacity)")
+                Text("\(currentEntries.count) / \(store.capacity(for: currentKind))")
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
             }
             Divider()

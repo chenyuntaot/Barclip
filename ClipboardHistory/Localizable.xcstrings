@@ -1,50 +1,6 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-    "地址已复制" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Path copied"
-          }
-        }
-      }
-    },
-    "复制地址" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy Path"
-          }
-        }
-      }
-    },
-    "显示说明" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show information"
-          }
-        }
-      }
-    },
-    "说明" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " Information"
-          }
-        }
-      }
-    },
     "%@ / %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -54,9 +10,6 @@
           }
         }
       }
-    },
-    "%@ 条" : {
-
     },
     "%d 条" : {
       "extractionState" : "manual",
@@ -83,6 +36,105 @@
     "Barclip" : {
 
     },
+    "一键清理全部磁盘缓存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear All Disk Cache"
+          }
+        }
+      }
+    },
+    "全部清理" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear All"
+          }
+        }
+      }
+    },
+    "取消" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "正在清理…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clearing…"
+          }
+        }
+      }
+    },
+    "清理全部磁盘缓存？" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear All Disk Cache?"
+          }
+        }
+      }
+    },
+    "点击复制按钮复制此地址，在 Finder 的“前往文件夹”中打开；也可在下方一键清理 Barclip 的全部文本、图片和文件暂存缓存。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy this path to open the folder with Finder's Go to Folder, or clear all Barclip text, image, and file staging caches below."
+          }
+        }
+      }
+    },
+    "已清理全部磁盘缓存。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All disk cache cleared."
+          }
+        }
+      }
+    },
+    "部分磁盘缓存清理失败，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some disk cache could not be cleared. Please try again."
+          }
+        }
+      }
+    },
+    "这会删除 Barclip 中的全部文本、图片和文件暂存记录，但不会删除原文件，也不会重置其他设置。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This removes all text, image, and staged file records from Barclip. Original files and other settings are not changed."
+          }
+        }
+      }
+    },
     "仍然退出" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -94,6 +146,28 @@
         }
       }
     },
+    "从暂存移除" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from Staging"
+          }
+        }
+      }
+    },
+    "从访达或桌面把文件拖到这里。原位置会保留一份。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag files here from Finder or the Desktop. The original stays in place."
+          }
+        }
+      }
+    },
     "保存策略" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -101,17 +175,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save Policy"
-          }
-        }
-      }
-    },
-    "缓存文件夹地址 %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cache folder path %@"
           }
         }
       }
@@ -145,6 +208,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clipboard access was denied. Allow this app to read the clipboard in System Settings."
+          }
+        }
+      }
+    },
+    "单击选中，空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to select, press space to preview, double-click to open. Dragging out copies the file and leaves the original."
           }
         }
       }
@@ -193,13 +267,24 @@
         }
       }
     },
-    "点击复制按钮复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。" : {
+    "原位置会保留文件" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Click the copy button, then open this path with Go to Folder in Finder to clean it manually."
+            "value" : "The original file is kept"
+          }
+        }
+      }
+    },
+    "启动" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startup"
           }
         }
       }
@@ -215,39 +300,6 @@
         }
       }
     },
-    "文件" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Files"
-          }
-        }
-      }
-    },
-    "文件已丢失" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "File Missing"
-          }
-        }
-      }
-    },
-    "文件夹" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folder"
-          }
-        }
-      }
-    },
     "在默认应用中打开" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -259,13 +311,13 @@
         }
       }
     },
-    "预览" : {
+    "地址已复制" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Preview"
+            "value" : "Path copied"
           }
         }
       }
@@ -288,6 +340,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copy some text and it will show up here."
+          }
+        }
+      }
+    },
+    "复制地址" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Path"
           }
         }
       }
@@ -347,6 +410,17 @@
         }
       }
     },
+    "打开登录项设置" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Login Items"
+          }
+        }
+      }
+    },
     "打开程序版本和关于我们" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -354,6 +428,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open version and about"
+          }
+        }
+      }
+    },
+    "拖到此处暂存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop to Stage"
+          }
+        }
+      }
+    },
+    "按空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press space to preview, double-click to open. Dragging out copies the file and leaves the original."
+          }
+        }
+      }
+    },
+    "文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Files"
+          }
+        }
+      }
+    },
+    "文件夹" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder"
+          }
+        }
+      }
+    },
+    "文件夹地址" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder Path"
+          }
+        }
+      }
+    },
+    "文件已丢失" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File Missing"
           }
         }
       }
@@ -369,13 +509,46 @@
         }
       }
     },
-    "文本、图片和文件各自保留该数量。超过上限时移除最早的记录，调小容量立即生效。" : {
+    "文本、图片和文件可分别设置保留数量，范围为 1 到 200 条。超过上限时移除最早的记录，调小容量立即生效。" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Text, images, and files each keep this many items. Older items are removed when the limit is exceeded. Lowering the limit takes effect immediately."
+            "value" : "Set separate limits for text, images, and files from 1 to 200. Older items are removed when a limit is exceeded. Lowering a limit takes effect immediately."
+          }
+        }
+      }
+    },
+    "无法打开该文件，它可能已被移动或删除。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't open this file. It may have been moved or deleted."
+          }
+        }
+      }
+    },
+    "无法更新开机启动，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t update Launch at Startup. Please try again."
+          }
+        }
+      }
+    },
+    "无法更新文件暂存。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't update staged files."
           }
         }
       }
@@ -387,6 +560,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Can't read the clipboard. Check clipboard access in System Settings, then retry."
+          }
+        }
+      }
+    },
+    "无法读取文件暂存，请重试。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't read staged files. Please retry."
           }
         }
       }
@@ -413,6 +597,50 @@
         }
       }
     },
+    "无法预览该文件，它可能已被移动或删除。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't preview this file. It may have been moved or deleted."
+          }
+        }
+      }
+    },
+    "显示说明" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show information"
+          }
+        }
+      }
+    },
+    "暂存区只记录文件引用。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staging only stores file references."
+          }
+        }
+      }
+    },
+    "暂存只记下文件位置，拖出时再复制" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Staging stores file locations and copies on the way out"
+          }
+        }
+      }
+    },
     "暂无历史记录" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -420,6 +648,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No History Yet"
+          }
+        }
+      }
+    },
+    "暂无暂存文件" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Staged Files"
           }
         }
       }
@@ -442,17 +681,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Couldn't update the local cache. You may lose new items or keep an old cache after quitting. Please retry."
-          }
-        }
-      }
-    },
-    "文件夹地址" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folder Path"
           }
         }
       }
@@ -490,24 +718,24 @@
         }
       }
     },
-    "磁盘缓存" : {
+    "清空暂存" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Disk Cache"
+            "value" : "Clear Staging"
           }
         }
       }
     },
-    "点击重新复制" : {
+    "清空暂存的文件引用，不会删除原文件" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Click to copy again"
+            "value" : "Removes staged file references. Original files are not deleted."
           }
         }
       }
@@ -523,6 +751,28 @@
         }
       }
     },
+    "点击复制按钮复制此地址，在 Finder 的“前往文件夹”中打开后手动清理。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click the copy button, then open this path with Go to Folder in Finder to clean it manually."
+          }
+        }
+      }
+    },
+    "点击重新复制" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to copy again"
+          }
+        }
+      }
+    },
     "现在退出可能丢失最新记录或保留旧缓存。可以返回后重试。" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -530,6 +780,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quitting now may lose the latest items or keep an old cache. You can go back and retry."
+          }
+        }
+      }
+    },
+    "登录 Mac 时自动启动 Barclip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Barclip automatically when you log in to this Mac"
+          }
+        }
+      }
+    },
+    "登录 Mac 时自动启动 Barclip。首次打开可能需要在系统设置的登录项中允许。从 Xcode 或非正式安装位置运行时，系统可能拒绝注册。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barclip opens automatically when you log in to this Mac. The first time, macOS may ask you to allow it in Login Items. Copies launched from Xcode or another unofficial location may not be able to register."
+          }
+        }
+      }
+    },
+    "开机自启动" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Startup"
+          }
+        }
+      }
+    },
+    "磁盘缓存" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disk Cache"
           }
         }
       }
@@ -567,6 +861,28 @@
         }
       }
     },
+    "系统尚未允许此登录项。请在系统设置中允许 Barclip。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS has not allowed this login item yet. Allow Barclip in System Settings."
+          }
+        }
+      }
+    },
+    "缓存文件夹地址 %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cache folder path %@"
+          }
+        }
+      }
+    },
     "联系邮箱" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -585,6 +901,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings"
+          }
+        }
+      }
+    },
+    "说明" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Information"
           }
         }
       }
@@ -655,171 +982,6 @@
         }
       }
     },
-    "暂无暂存文件" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Staged Files"
-          }
-        }
-      }
-    },
-    "从访达或桌面把文件拖到这里。原位置会保留一份。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drag files here from Finder or the Desktop. The original stays in place."
-          }
-        }
-      }
-    },
-    "拖到此处暂存" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drop to Stage"
-          }
-        }
-      }
-    },
-    "原位置会保留文件" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The original file is kept"
-          }
-        }
-      }
-    },
-    "清空暂存" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Staging"
-          }
-        }
-      }
-    },
-    "清空暂存的文件引用，不会删除原文件" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Removes staged file references. Original files are not deleted."
-          }
-        }
-      }
-    },
-    "从暂存移除" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from Staging"
-          }
-        }
-      }
-    },
-    "单击选中，空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Click to select, press space to preview, double-click to open. Dragging out copies the file and leaves the original."
-          }
-        }
-      }
-    },
-    "按空格预览，双击打开。向外拖时复制一份，不移动原文件。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Press space to preview, double-click to open. Dragging out copies the file and leaves the original."
-          }
-        }
-      }
-    },
-    "无法读取文件暂存，请重试。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can't read staged files. Please retry."
-          }
-        }
-      }
-    },
-    "无法更新文件暂存。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't update staged files."
-          }
-        }
-      }
-    },
-    "无法打开该文件，它可能已被移动或删除。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can't open this file. It may have been moved or deleted."
-          }
-        }
-      }
-    },
-    "无法预览该文件，它可能已被移动或删除。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can't preview this file. It may have been moved or deleted."
-          }
-        }
-      }
-    },
-    "暂存只记下文件位置，拖出时再复制" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Staging stores file locations and copies on the way out"
-          }
-        }
-      }
-    },
-    "暂存区只记录文件引用。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Staging only stores file references."
-          }
-        }
-      }
-    },
     "重启后保留" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -864,83 +1026,6 @@
         }
       }
     },
-    "启动" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Startup"
-          }
-        }
-      }
-    },
-    "登录时打开" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open at Login"
-          }
-        }
-      }
-    },
-    "登录 Mac 时自动启动 Barclip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Barclip automatically when you log in to this Mac"
-          }
-        }
-      }
-    },
-    "登录 Mac 时自动启动 Barclip。首次打开可能需要在系统设置的登录项中允许。从 Xcode 或非正式安装位置运行时，系统可能拒绝注册。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Barclip opens automatically when you log in to this Mac. The first time, macOS may ask you to allow it in Login Items. Copies launched from Xcode or another unofficial location may not be able to register."
-          }
-        }
-      }
-    },
-    "系统尚未允许此登录项。请在系统设置中允许 Barclip。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "macOS has not allowed this login item yet. Allow Barclip in System Settings."
-          }
-        }
-      }
-    },
-    "打开登录项设置" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Login Items"
-          }
-        }
-      }
-    },
-    "无法更新开机启动，请重试。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn’t update Open at Login. Please try again."
-          }
-        }
-      }
-    },
     "项目仓库" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -948,6 +1033,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository"
+          }
+        }
+      }
+    },
+    "预览" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
           }
         }
       }

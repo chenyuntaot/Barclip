@@ -112,14 +112,88 @@ final class ViewRenderingTests: XCTestCase {
         )
         XCTAssertEqual(String(localized: "退出后清空", bundle: english), "Clear on Quit")
         XCTAssertEqual(String(localized: "磁盘缓存", bundle: english), "Disk Cache")
+        XCTAssertEqual(String(localized: "一键清理全部磁盘缓存", bundle: english), "Clear All Disk Cache")
+        XCTAssertEqual(String(localized: "清理全部磁盘缓存？", bundle: english), "Clear All Disk Cache?")
+        XCTAssertEqual(String(localized: "全部清理", bundle: english), "Clear All")
         XCTAssertEqual(String(localized: "文件夹地址", bundle: english), "Folder Path")
         XCTAssertEqual(String(localized: "启动", bundle: english), "Startup")
-        XCTAssertEqual(String(localized: "登录时打开", bundle: english), "Open at Login")
+        XCTAssertEqual(String(localized: "开机自启动", bundle: english), "Launch at Startup")
         XCTAssertEqual(String(localized: "打开登录项设置", bundle: english), "Open Login Items")
+        XCTAssertEqual(String(localized: "保留条数", bundle: english), "Keep")
+        XCTAssertEqual(
+            String(localized: "文本、图片和文件可分别设置保留数量，范围为 1 到 200 条。超过上限时移除最早的记录，调小容量立即生效。", bundle: english),
+            "Set separate limits for text, images, and files from 1 to 200. Older items are removed when a limit is exceeded. Lowering a limit takes effect immediately."
+        )
         XCTAssertEqual(String(localized: "关于我们", bundle: english), "About")
         XCTAssertEqual(String(localized: "已复制，可使用 ⌘V 粘贴。", bundle: english), "Copied. Paste with ⌘V.")
         XCTAssertEqual(ClipboardStore.StatusMessage.copied.allowsRetry, false)
         XCTAssertEqual(ClipboardStore.StatusMessage.pasteboardReadFailed.allowsRetry, true)
+    }
+
+    func testDiskCacheCleanerClearsAllRecordsAndLeavesOriginalFile() async throws {
+        let suite = "ClipboardHistory.ClearAllCache.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let cacheDirectory = FileManager.default.temporaryDirectory.appending(path: suite, directoryHint: .isDirectory)
+        let historyURL = cacheDirectory.appending(path: "history.json")
+        let stagingURL = cacheDirectory.appending(path: "file-staging.json")
+        let leftoverURL = cacheDirectory.appending(path: "leftover.txt")
+        let originalURL = FileManager.default.temporaryDirectory.appending(path: "\(suite)-original.txt")
+        defer {
+            UserDefaults.standard.removePersistentDomain(forName: suite)
+            try? FileManager.default.removeItem(at: cacheDirectory)
+            try? FileManager.default.removeItem(at: originalURL)
+        }
+
+        let board = RenderPasteboard()
+        let store = ClipboardStore(
+            pasteboard: board,
+            defaults: defaults,
+            repository: HistoryRepository(fileURL: historyURL)
+        )
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: stagingURL)
+        )
+        store.setRetention(.persistent)
+        files.setRetention(.persistent)
+        board.png = TestPNG.pixel
+        board.containsImage = true
+        board.containsText = false
+        board.changeCount += 1
+        store.poll()
+        board.png = nil
+        board.containsImage = false
+        board.containsText = true
+        board.text = "待清理的文本"
+        board.changeCount += 1
+        store.poll()
+        try Data("原文件保留".utf8).write(to: originalURL)
+        files.stage([originalURL])
+        await store.finishPendingSave()
+        await files.finishPendingSave()
+        try Data("残留".utf8).write(to: leftoverURL)
+
+        XCTAssertEqual(store.entries.count, 1)
+        XCTAssertEqual(store.imageEntries.count, 1)
+        XCTAssertEqual(files.items.count, 1)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: historyURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: stagingURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: leftoverURL.path))
+
+        let succeeded = await DiskCacheCleaner.clear(clipboard: store, files: files)
+
+        XCTAssertTrue(succeeded)
+        XCTAssertTrue(store.entries.isEmpty)
+        XCTAssertTrue(store.imageEntries.isEmpty)
+        XCTAssertTrue(files.items.isEmpty)
+        XCTAssertNil(store.storageError)
+        XCTAssertNil(files.storageError)
+        let remaining = try FileManager.default.contentsOfDirectory(
+            at: cacheDirectory,
+            includingPropertiesForKeys: nil
+        ).map(\.lastPathComponent).sorted()
+        XCTAssertEqual(remaining, [".migration-complete"])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: originalURL.path), "清理缓存不能删除用户原文件")
     }
 
     func testSettingsFooterKeepsAboutEntryVisible() throws {
@@ -143,6 +217,54 @@ final class ViewRenderingTests: XCTestCase {
         let size = host.sizeThatFits(in: CGSize(width: 360, height: 0))
         XCTAssertGreaterThan(size.height, 330,
             "设置页底部需要放下程序版本、关于我们和版权；实际 \(size.height)")
+    }
+
+    func testCapacitySlidersDoNotRenderDenseTickLines() throws {
+        let suite = "ClipboardHistory.SliderTicks.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        let store = ClipboardStore(
+            pasteboard: RenderPasteboard(),
+            defaults: defaults,
+            repository: HistoryRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "history.json"))
+        )
+        let files = FileStagingStore(
+            defaults: defaults,
+            repository: FileStagingRepository(fileURL: FileManager.default.temporaryDirectory
+                .appending(path: suite).appending(path: "file-staging.json"))
+        )
+        let host = NSHostingView(rootView: settings(store, files)
+            .padding(16)
+            .frame(width: 360)
+            .background(Color(nsColor: .windowBackgroundColor))
+            .environment(\.colorScheme, ColorScheme.light)
+            .environment(\.locale, Locale(identifier: "zh_Hans")))
+        host.appearance = NSAppearance(named: .aqua)
+        host.frame = NSRect(origin: .zero, size: host.fittingSize)
+        host.layoutSubtreeIfNeeded()
+        let bitmap = try XCTUnwrap(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+
+        let xRange = Int(Double(bitmap.pixelsWide) * 0.45)..<Int(Double(bitmap.pixelsWide) * 0.72)
+        let trackCenters = blueTrackCenters(
+            in: bitmap,
+            xRange: 0..<bitmap.pixelsWide,
+            topYRange: Int(Double(bitmap.pixelsHigh) * 0.12)..<Int(Double(bitmap.pixelsHigh) * 0.52)
+        )
+        XCTAssertEqual(trackCenters.count, 3, "应检测到三个容量滑块的蓝色轨道")
+        for center in trackCenters {
+            let darkPixelsBelowTrack = maximumDarkPixelsInRow(
+                in: bitmap,
+                xRange: xRange,
+                topYRange: (center + 8)..<(center + 18)
+            )
+            XCTAssertLessThan(
+                darkPixelsBelowTrack,
+                Int(Double(bitmap.pixelsWide) * 0.07),
+                "容量滑块下方不应出现由密集刻度合并成的黑线；检测到 \(darkPixelsBelowTrack) 个深色像素"
+            )
+        }
     }
 
     func testHistoryRemainsVisibleUnderCompactMenuProposal() async throws {
@@ -274,6 +396,65 @@ final class ViewRenderingTests: XCTestCase {
         XCTAssertGreaterThan(bitmap.pixelsWide, 0)
         XCTAssertGreaterThan(bitmap.pixelsHigh, 0)
     }
+
+    private func blueTrackCenters(
+        in bitmap: NSBitmapImageRep,
+        xRange: Range<Int>,
+        topYRange: Range<Int>
+    ) -> [Int] {
+        var bands: [ClosedRange<Int>] = []
+        var bandStart: Int?
+        for topY in topYRange {
+            let y = topY
+            var count = 0
+            for x in xRange {
+                guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else {
+                    continue
+                }
+                let isBlue = color.alphaComponent > 0.8
+                    && color.redComponent < 0.25
+                    && color.blueComponent > 0.65
+                    && color.blueComponent > color.greenComponent
+                if isBlue {
+                    count += 1
+                }
+            }
+            if count >= 4 {
+                if bandStart == nil { bandStart = topY }
+            } else if let start = bandStart {
+                bands.append(start...(topY - 1))
+                bandStart = nil
+            }
+        }
+        if let bandStart {
+            bands.append(bandStart...(topYRange.upperBound - 1))
+        }
+        return bands.map { ($0.lowerBound + $0.upperBound) / 2 }
+    }
+
+    private func maximumDarkPixelsInRow(
+        in bitmap: NSBitmapImageRep,
+        xRange: Range<Int>,
+        topYRange: Range<Int>
+    ) -> Int {
+        var maximum = 0
+        for topY in topYRange {
+            let y = topY
+            var count = 0
+            for x in xRange {
+                guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                if color.alphaComponent > 0.8,
+                   color.redComponent < 0.75,
+                   color.greenComponent < 0.75,
+                   color.blueComponent < 0.75 {
+                    count += 1
+                }
+            }
+            maximum = max(maximum, count)
+        }
+        return maximum
+    }
+
 }
 
 @MainActor

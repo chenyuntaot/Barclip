@@ -58,6 +58,23 @@ actor HistoryRepository {
         try markMigrationComplete()
     }
 
+    func wipeCacheDirectory() throws {
+        let directory = fileURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700]
+        )
+        try markMigrationComplete()
+        let items = try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil
+        )
+        for item in items where item.lastPathComponent != ".migration-complete" {
+            try FileManager.default.removeItem(at: item)
+        }
+    }
+
     private var migrationMarker: URL {
         fileURL.deletingLastPathComponent().appending(path: ".migration-complete")
     }

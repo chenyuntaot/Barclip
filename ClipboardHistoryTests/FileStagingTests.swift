@@ -113,10 +113,15 @@ final class FileStagingTests: XCTestCase {
         XCTAssertEqual(store.items.first?.displayName, "file-12.txt")
         XCTAssertEqual(store.items.last?.displayName, "file-3.txt")
         store.setCapacity(10)
-        store.setCapacity(25)
+        store.setCapacity(26)
         XCTAssertEqual(store.items.count, 10)
-        store.setCapacity(-1)
-        XCTAssertEqual(store.capacity, 25)
+        XCTAssertEqual(
+            FileStagingStore(defaults: defaults, repository: FileStagingRepository(fileURL: stagingURL)).capacity,
+            26
+        )
+        store.setCapacity(0)
+        store.setCapacity(201)
+        XCTAssertEqual(store.capacity, 26)
     }
 
     func testPersistentRestartAndSessionDoesNotWrite() async throws {

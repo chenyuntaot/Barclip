@@ -52,19 +52,37 @@ final class ClipboardStoreTests: XCTestCase {
         await store.finishPendingSave()
     }
 
-    func testCapacityTrimsImmediatelyAndPersists() async throws {
+    func testTextAndImageCapacitiesTrimAndPersistIndependently() async throws {
         let (store, board, defaults) = try fixture()
         for value in 0..<60 { board.publish("\(value)"); store.poll() }
         XCTAssertEqual(store.entries.count, 50)
-        store.setCapacity(10)
-        XCTAssertEqual(store.entries.map(\.text), (50..<60).reversed().map(String.init))
-        XCTAssertEqual(ClipboardStore(pasteboard: board, defaults: defaults).capacity, 10)
-        store.setCapacity(100)
-        XCTAssertEqual(store.entries.count, 10)
-        store.setCapacity(-1)
-        XCTAssertEqual(store.capacity, 100)
+        store.setCapacity(25, for: .text)
+        store.setCapacity(26, for: .image)
+        XCTAssertEqual(store.entries.map(\.text), (35..<60).reversed().map(String.init))
+        XCTAssertEqual(store.textCapacity, 25)
+        XCTAssertEqual(store.imageCapacity, 26)
+
+        let reopened = ClipboardStore(pasteboard: board, defaults: defaults)
+        XCTAssertEqual(reopened.textCapacity, 25)
+        XCTAssertEqual(reopened.imageCapacity, 26)
+
+        store.setCapacity(100, for: .text)
+        XCTAssertEqual(store.entries.count, 25)
+        store.setCapacity(0, for: .text)
+        store.setCapacity(201, for: .image)
+        XCTAssertEqual(store.textCapacity, 100)
+        XCTAssertEqual(store.imageCapacity, 26)
         await store.finishPendingSave()
-        defaults.removeObject(forKey: "historyCapacity")
+    }
+
+    func testLegacyCapacityInitializesBothClipboardTypes() throws {
+        let suite = "ClipboardHistoryTests.LegacyCapacity.\(UUID().uuidString)"
+        suites.append(suite)
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defaults.set(25, forKey: "historyCapacity")
+        let store = ClipboardStore(pasteboard: FakePasteboard(), defaults: defaults)
+        XCTAssertEqual(store.textCapacity, 25)
+        XCTAssertEqual(store.imageCapacity, 25)
     }
 
     func testClearDoesNotRestoreCurrentTextOrOverwritePasteboard() async throws {
@@ -124,7 +142,7 @@ final class ClipboardStoreTests: XCTestCase {
         }
         XCTAssertEqual(store.imageEntries.count, 50)
         XCTAssertEqual(store.entries.count, 1)
-        store.setCapacity(10)
+        store.setCapacity(10, for: .image)
         XCTAssertEqual(store.imageEntries.count, 10)
         XCTAssertEqual(store.entries.count, 1)
         await store.finishPendingSave()

@@ -5,11 +5,13 @@ import OSLog
 @MainActor
 @Observable
 final class ClipboardStore {
-    static let capacityOptions = [10, 25, 50, 100, 200]
+    static let capacityRange = 1...200
+    static let defaultCapacity = 50
     static let maxImageBytes = 30 * 1_048_576
     private(set) var entries: [ClipboardEntry] = []
     private(set) var imageEntries: [ClipboardEntry] = []
-    private(set) var capacity: Int
+    private(set) var textCapacity: Int
+    private(set) var imageCapacity: Int
     private(set) var retention: RetentionPolicy
     private(set) var message: StatusMessage?
     private(set) var accessDenied = false
@@ -75,8 +77,13 @@ final class ClipboardStore {
         self.defaults = defaults
         self.repository = repository
         retention = RetentionPolicy(rawValue: defaults.string(forKey: "retentionPolicy") ?? "") ?? .session
-        let saved = defaults.integer(forKey: "historyCapacity")
-        capacity = Self.capacityOptions.contains(saved) ? saved : 50
+        let legacyCapacity = Self.savedCapacity(in: defaults, forKey: "historyCapacity")
+        textCapacity = Self.savedCapacity(in: defaults, forKey: "textHistoryCapacity")
+            ?? legacyCapacity
+            ?? Self.defaultCapacity
+        imageCapacity = Self.savedCapacity(in: defaults, forKey: "imageHistoryCapacity")
+            ?? legacyCapacity
+            ?? Self.defaultCapacity
         lastChangeCount = pasteboard.changeCount
     }
 
@@ -86,6 +93,13 @@ final class ClipboardStore {
         switch kind {
         case .text: entries
         case .image: imageEntries
+        }
+    }
+
+    func capacity(for kind: ClipboardKind) -> Int {
+        switch kind {
+        case .text: textCapacity
+        case .image: imageCapacity
         }
     }
 
@@ -152,7 +166,7 @@ final class ClipboardStore {
         }
         entries.removeAll { $0.text == text }
         entries.insert(ClipboardEntry(text: text), at: 0)
-        entries = Array(entries.prefix(capacity))
+        entries = Array(entries.prefix(textCapacity))
         message = nil
         persist()
     }
@@ -165,17 +179,23 @@ final class ClipboardStore {
         }
         imageEntries.removeAll { $0.imagePNG == data }
         imageEntries.insert(ClipboardEntry(imagePNG: data), at: 0)
-        imageEntries = Array(imageEntries.prefix(capacity))
+        imageEntries = Array(imageEntries.prefix(imageCapacity))
         message = nil
         persist()
     }
 
-    func setCapacity(_ value: Int) {
-        guard !isLoading, storageError != .load, Self.capacityOptions.contains(value) else { return }
-        capacity = value
-        defaults.set(value, forKey: "historyCapacity")
-        entries = Array(entries.prefix(value))
-        imageEntries = Array(imageEntries.prefix(value))
+    func setCapacity(_ value: Int, for kind: ClipboardKind) {
+        guard !isLoading, storageError != .load, Self.capacityRange.contains(value) else { return }
+        switch kind {
+        case .text:
+            textCapacity = value
+            defaults.set(value, forKey: "textHistoryCapacity")
+            entries = Array(entries.prefix(value))
+        case .image:
+            imageCapacity = value
+            defaults.set(value, forKey: "imageHistoryCapacity")
+            imageEntries = Array(imageEntries.prefix(value))
+        }
         persist()
     }
 
@@ -260,8 +280,8 @@ final class ClipboardStore {
                         images.append(entry)
                     }
                 }
-                entries = Array(texts.prefix(capacity))
-                imageEntries = Array(images.prefix(capacity))
+                entries = Array(texts.prefix(textCapacity))
+                imageEntries = Array(images.prefix(imageCapacity))
             } else {
                 try await repository.save(nil, revision: revision)
             }
@@ -302,5 +322,23 @@ final class ClipboardStore {
 
     func finishPendingSave() async {
         await saveTask?.value
+    }
+
+    func wipeDiskCache() async -> Bool {
+        do {
+            try await repository.wipeCacheDirectory()
+            storageError = nil
+            return true
+        } catch {
+            storageError = .save
+            Self.logger.error("Disk cache wipe failed")
+            return false
+        }
+    }
+
+    private static func savedCapacity(in defaults: UserDefaults, forKey key: String) -> Int? {
+        guard defaults.object(forKey: key) != nil else { return nil }
+        let value = defaults.integer(forKey: key)
+        return capacityRange.contains(value) ? value : nil
     }
 }

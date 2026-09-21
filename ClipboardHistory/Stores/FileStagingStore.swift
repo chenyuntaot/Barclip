@@ -53,8 +53,9 @@ final class FileStagingStore {
         self.defaults = defaults
         self.repository = repository
         retention = RetentionPolicy(rawValue: defaults.string(forKey: "retentionPolicy") ?? "") ?? .session
-        let saved = defaults.integer(forKey: "historyCapacity")
-        capacity = ClipboardStore.capacityOptions.contains(saved) ? saved : 50
+        let saved = Self.savedCapacity(in: defaults, forKey: "fileHistoryCapacity")
+            ?? Self.savedCapacity(in: defaults, forKey: "historyCapacity")
+        capacity = saved ?? ClipboardStore.defaultCapacity
     }
 
     func start() {
@@ -98,8 +99,9 @@ final class FileStagingStore {
     }
 
     func setCapacity(_ value: Int) {
-        guard !isLoading, storageError != .load, ClipboardStore.capacityOptions.contains(value) else { return }
+        guard !isLoading, storageError != .load, ClipboardStore.capacityRange.contains(value) else { return }
         capacity = value
+        defaults.set(value, forKey: "fileHistoryCapacity")
         items = Array(items.prefix(value))
         persist()
     }
@@ -165,6 +167,10 @@ final class FileStagingStore {
         await saveTask?.value
     }
 
+    func noteDiskCacheWiped() {
+        storageError = nil
+    }
+
     private func persist() {
         revision += 1
         let currentRevision = revision
@@ -181,5 +187,11 @@ final class FileStagingStore {
                 Self.logger.error("Local file staging update failed")
             }
         }
+    }
+
+    private static func savedCapacity(in defaults: UserDefaults, forKey key: String) -> Int? {
+        guard defaults.object(forKey: key) != nil else { return nil }
+        let value = defaults.integer(forKey: key)
+        return ClipboardStore.capacityRange.contains(value) ? value : nil
     }
 }
